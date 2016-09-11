@@ -23,7 +23,7 @@ def getmatches():
     matchlist = matches.find_all("div", {"class": ["matchListBox", "matchListDateBox"]})
     for match in matchlist:
         if match['class'][0] == "matchListDateBox":
-            print "*", match.text
+            print("* " +  match.text)
         else:
             try:
                 time = match.find("div", {"class": "matchTimeCell"}).text.strip()
@@ -31,7 +31,7 @@ def getmatches():
                 team2 = match.find("div", {"class": "matchTeam2Cell"}).text.strip()
                 print(time + " " + team1 + " vs " + team2)
             except:
-                print match.text[:7].strip(), match.text[7:-7].strip()
+                print(match.text[:7].strip(), match.text[7:-7].strip())
     
 if __name__ == "__main__":
     getmatches()
