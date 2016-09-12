@@ -3,7 +3,6 @@ import json
 from bs4 import BeautifulSoup
 from python_utils import converters
 
-
 def get_parsed_page(url):
     return BeautifulSoup(requests.get(url).text, "lxml")
 
@@ -38,8 +37,9 @@ def top20teams():
                 player['player-id'] = converters.to_int(player_link[player_link.index('playerid'):], regexp=True)
             else:
                 player['player-id'] = converters.to_int(player_link, regexp=True)
-            if player['player-id'] == 1916:
-                player['name'] = "seang@res"
+            if player['name'].startswith("[email"):
+                player_page = get_parsed_page(str("http://www.hltv.org" + player_anchor['href']))
+                player['name'] = player_page.title.text.split()[0]
             newteam['team-players'].append(player)
         teamlist.append(newteam)
     return teamlist
