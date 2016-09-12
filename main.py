@@ -1,14 +1,11 @@
 import requests
 import json
 from bs4 import BeautifulSoup
+from python_utils import converters
 
 
 def get_parsed_page(url):
     return BeautifulSoup(requests.get(url).text, "lxml")
-
-
-def parseint(string):
-    return int(''.join([x for x in string if x.isdigit()]))
 
 
 def top5teams():
@@ -28,15 +25,21 @@ def top20teams():
     teamlist = []
     for team in teams:
         newteam = {'name': team.select('.ranking-teamName > a')[0].text.strip(),
-                   'rank': parseint(team.select('.ranking-number')[0].text.strip()),
-                   'rank-points': parseint(team.select('.ranking-teamName > span')[0].text),
-                   'team-id': parseint(team.select('.ranking-delta')[0].get('id')),
+                   'rank': converters.to_int(team.select('.ranking-number')[0].text.strip(), regexp=True),
+                   'rank-points': converters.to_int(team.select('.ranking-teamName > span')[0].text, regexp=True),
+                   'team-id': converters.to_int(team.select('.ranking-delta')[0].get('id'), regexp=True),
                    'team-players': []}
         for player_div in team.select('.ranking-lineup > div'):
             player = {}
             player_anchor = player_div.select('.ranking-playerNick > a')[0]
             player['name'] = player_anchor.text.strip()
-            player['player-id'] = parseint(player_anchor.get('href'))
+            player_link = player_anchor.get('href')
+            if 'pageid' in player_link:
+                player['player-id'] = converters.to_int(player_link[player_link.index('playerid'):], regexp=True)
+            else:
+                player['player-id'] = converters.to_int(player_link, regexp=True)
+            if player['player-id'] == 1916:
+                player['name'] = "seang@res"
             newteam['team-players'].append(player)
         teamlist.append(newteam)
     return teamlist
