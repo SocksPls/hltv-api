@@ -32,7 +32,12 @@ def top20teams():
         for player_div in team.select('.ranking-lineup > div'):
             player = {}
             player_anchor = player_div.select('.ranking-playerNick > a')[0]
-            player['player-id'] = converters.to_int(player_anchor.get('href'), regexp=True)
+            player['name'] = player_anchor.text.strip()
+            player_link = player_anchor.get('href')
+            if 'pageid' in player_link:
+                player['player-id'] = converters.to_int(player_link[player_link.index('playerid'):], regexp=True)
+            else:
+                player['player-id'] = converters.to_int(player_link, regexp=True)
             if player['player-id'] == 1916:
                 player['name'] = "seang@res"
             newteam['team-players'].append(player)
