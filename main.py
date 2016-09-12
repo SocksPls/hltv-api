@@ -45,6 +45,13 @@ def top20teams():
     return teamlist
 
 
+def topplayers():
+    page = get_parsed_page("http://www.hltv.org/?pageid=348&statsfilter=10&mapid=0")
+    boxes = page.find_all("div", {"class": "framedBox"})
+    for box in boxes:
+        print(box.find("h2").text)
+        for player in box.find_all("div", {"style":["background-color: #E8E8E8;;padding:5px;", ";padding:5px;"]}):
+            print "* ", player.text.replace(")", ") ")
 
 def getmatches():
     matches = get_parsed_page("http://www.hltv.org/matches/")
@@ -62,4 +69,4 @@ def getmatches():
                 print(match.text[:7].strip(), match.text[7:-7].strip())
 
 if __name__ == "__main__":
-    print(top20teams())
+    topplayers()
