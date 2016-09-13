@@ -1,7 +1,7 @@
 import requests
-import json
 from bs4 import BeautifulSoup
 from python_utils import converters
+
 
 def get_parsed_page(url):
     return BeautifulSoup(requests.get(url).text, "lxml")
@@ -45,13 +45,25 @@ def top20teams():
     return teamlist
 
 
-def topplayers():
+def top_players():
     page = get_parsed_page("http://www.hltv.org/?pageid=348&statsfilter=10&mapid=0")
     boxes = page.find_all("div", {"class": "framedBox"})
+    top_player_categories = []
     for box in boxes:
-        print(box.find("h2").text)
-        for player in box.find_all("div", {"style":["background-color: #E8E8E8;;padding:5px;", ";padding:5px;"]}):
-            print "* ", player.text.replace(")", ") ")
+        category_obj = {'category': box.find("h2").text}
+        players = []
+        for player_elem in box.select("> div"):
+            player = {}
+            player_link = player_elem.find('a')
+            player['name'] = player_link.text.replace(")", ") ")
+            p_url = player_link['href']
+            player['player-id'] = converters.to_int(p_url[p_url.index('playerid=')+9:p_url.index('&statsfilter')])
+            player['stat'] = player_elem.select('div:nth-of-type(2)')[0].text
+            players.append(player)
+        category_obj['players'] = players
+        top_player_categories.append(category_obj)
+    return top_player_categories
+
 
 def getmatches():
     matches = get_parsed_page("http://www.hltv.org/matches/")
@@ -69,4 +81,4 @@ def getmatches():
                 print(match.text[:7].strip(), match.text[7:-7].strip())
 
 if __name__ == "__main__":
-    topplayers()
+    print(top_players())
