@@ -56,6 +56,7 @@ def top_players():
             player = {}
             player_link = player_elem.find('a')
             player['name'] = player_link.text
+            player['team'] = player_elem.text.split("(")[1].split(")")[0]
             p_url = player_link['href']
             player['player-id'] = converters.to_int(p_url[p_url.index('playerid=')+9:p_url.index('&statsfilter')])
             player['stat'] = player_elem.select('div:nth-of-type(2)')[0].text
