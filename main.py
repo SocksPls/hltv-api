@@ -65,8 +65,15 @@ def top_players():
         top_player_categories.append(category_obj)
     return top_player_categories
 
+def get_players(teamid):
+    page = get_parsed_page("http://www.hltv.org/?pageid=362&teamid=" + teamid)
+    titlebox = page.find("div", {"class": "centerFade"})
+    players = []
+    for player in titlebox.find_all("div")[5:25]:
+        players.append(player.text.strip())
+    print [x for x in set(players) if x is not u'']
 
-def getmatches():
+def get_matches():
     matches = get_parsed_page("http://www.hltv.org/matches/")
     matchlist = matches.find_all("div", {"class": ["matchListBox", "matchListDateBox"]})
     for match in matchlist:
@@ -82,4 +89,4 @@ def getmatches():
                 print(match.text[:7].strip(), match.text[7:-7].strip())
 
 if __name__ == "__main__":
-    print(top_players())
+    get_players("5378")
