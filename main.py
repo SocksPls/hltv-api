@@ -65,13 +65,67 @@ def top_players():
         top_player_categories.append(category_obj)
     return top_player_categories
 
+
 def get_players(teamid):
     page = get_parsed_page("http://www.hltv.org/?pageid=362&teamid=" + teamid)
     titlebox = page.find("div", {"class": "centerFade"})
     players = []
     for player in titlebox.find_all("div")[5:25]:
         players.append(player.text.strip())
-    print [x for x in set(players) if x is not u'']
+    print([x for x in set(players) if x is not u''])
+
+
+def get_team_info(teamid):
+    """
+    :param teamid: integer (or string consisting of integers)
+    :return: dictionary of team
+
+    example team id: 5378 (virtus pro)
+    """
+    page = get_parsed_page("http://www.hltv.org/?pageid=179&teamid=" + str(teamid))
+
+    team_info = {}
+
+    content_boxes = page.select('div.centerFade .covGroupBoxContent')
+    team_info['team-name']=content_boxes[0].select('> div')[0].text.strip()
+    team_info['region'] = content_boxes[0].select('> div')[4].select('.covSmallHeadline')[1].text.strip()
+
+    current_lineup_div = content_boxes[1]
+    current_lineup = _get_lineup(current_lineup_div.select('a'))
+    team_info['current-lineup'] = current_lineup
+
+    historical_players_div = content_boxes[2]
+    historical_players = _get_lineup(historical_players_div.select('a'))
+    team_info['historical-players'] = historical_players
+
+    team_stats_div = content_boxes[3]
+    team_stats = {}
+    for index, stat_div in enumerate(team_stats_div.select('> div')[3:]):
+        if (index%2):
+            stat_title = stat_div.select('.covSmallHeadline')[0].text.strip()
+            stat_value = stat_div.select('.covSmallHeadline')[1].text.strip()
+            team_stats[stat_title] = stat_value
+    team_info['stats'] = team_stats
+
+    return team_info
+
+
+def _get_lineup(player_anchors):
+    """
+    helper function for function above
+    :return: list of players
+    """
+    players = []
+    for player_anchor in player_anchors:
+        player = {}
+        player_link = player_anchor.get('href')
+        player['player-id'] = converters.to_int(player_link[player_link.index('playerid'):], regexp=True)
+        player_text = player_anchor.text
+        player['name'] = player_text[0:player_text.index("(")].strip()
+        player['maps-played'] = converters.to_int(player_text[player_text.index("("):], regexp=True)
+        players.append(player)
+    return players
+
 
 def get_matches():
     matches = get_parsed_page("http://www.hltv.org/matches/")
@@ -89,4 +143,4 @@ def get_matches():
                 print(match.text[:7].strip(), match.text[7:-7].strip())
 
 if __name__ == "__main__":
-    get_players("5378")
+    print(get_team_info(5378))
