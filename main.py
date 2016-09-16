@@ -183,8 +183,8 @@ def get_results():
             team1['name'] = team1div.text.strip()
             #I seem to get the ID slightly differently, still works fine though
             team1href = team1div.select('a')[0].get('href')
-            team1['id'] = team1href.split("=")[-1]
-            team1['score'] = scores.split("-")[0].strip()
+            team1['id'] = converters.to_int(team1href.split("=")[-1], regexp=True)
+            team1['score'] = converters.to_int(scores.split("-")[0].strip(), regexp=True)
             resultd['team1'] = team1
 
             #Team 2 info
@@ -192,8 +192,8 @@ def get_results():
             team2 = {}
             team2['name'] = team2div.text.strip()
             team2href = team2div.select('a')[0].get('href')
-            team2['id'] = team2href.split("=")[-1]
-            team2['score'] = scores.split("-")[1].strip()
+            team2['id'] = converters.to_int(team2href.split("=")[-1], regexp=True)
+            team2['score'] = converters.to_int(scores.split("-")[1].strip(), regexp=True)
             resultd['team2'] = team2
 
             results_list.append(resultd)
