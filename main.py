@@ -130,17 +130,34 @@ def _get_lineup(player_anchors):
 def get_matches():
     matches = get_parsed_page("http://www.hltv.org/matches/")
     matchlist = matches.find_all("div", {"class": ["matchListBox", "matchListDateBox"]})
+    datestring = ""
+    matches_list = []
     for match in matchlist:
         if match['class'][0] == "matchListDateBox":
-            print("* " + match.text)
+            # TODO possibly change this into real date object
+            datestring = match.text.strip()
         else:
             try:
-                time = match.find("div", {"class": "matchTimeCell"}).text.strip()
-                team1 = match.find("div", {"class": "matchTeam1Cell"}).text.strip()
-                team2 = match.find("div", {"class": "matchTeam2Cell"}).text.strip()
-                print(time + " " + team1 + " vs " + team2)
+                matchd = {}
+                matchd['date'] = datestring + " - " + match.find("div", {"class": "matchTimeCell"}).text.strip()
+                team1div = match.find("div", {"class": "matchTeam1Cell"})
+                team1 = {}
+                team1["name"] = team1div.text.strip()
+                team1href = team1div.select('a')[0].get('href')
+                team1["id"] = converters.to_int(team1href[team1href.index('teamid'):], regexp=True)
+                matchd['team1'] = team1
+                team2div = match.find("div", {"class": "matchTeam2Cell"})
+                team2 = {}
+                team2["name"] = team2div.text.strip()
+                team2href = team2div.select('a')[0].get('href')
+                team2["id"] = converters.to_int(team2href[team2href.index('teamid'):], regexp=True)
+                matchd['team2'] = team2
+                # TODO include link (id) to match page
+                matches_list.append(matchd)
             except:
+                # what does this do man?
                 print(match.text[:7].strip(), match.text[7:-7].strip())
+    return matches_list
 
 if __name__ == "__main__":
-    print(get_team_info(5378))
+    print(get_matches())
