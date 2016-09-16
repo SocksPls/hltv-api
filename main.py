@@ -201,4 +201,6 @@ def get_results():
             
             
 if __name__ == "__main__":
-    print(get_results())
+    import pprint
+    pp = pprint.PrettyPrinter
+    pp.pprint(get_results())
