@@ -138,6 +138,7 @@ def get_matches():
             datestring = match.text.strip()
         else:
             try:
+                #What does matchd mean?
                 matchd = {}
                 matchd['date'] = datestring + " - " + match.find("div", {"class": "matchTimeCell"}).text.strip()
                 team1div = match.find("div", {"class": "matchTeam1Cell"})
@@ -159,5 +160,45 @@ def get_matches():
                 print(match.text[:7].strip(), match.text[7:-7].strip())
     return matches_list
 
+def get_results():
+    results = get_parsed_page("http://www.hltv.org/results/")
+    resultslist = results.find_all("div", {"class": ["matchListBox", "matchListDateBox"]})
+    datestring = ""
+    results_list = []
+    for result in resultslist:
+        if result['class'][0] == "matchListDateBox":
+            # TODO possibly change this into a real date object
+            datestring = result.text.strip()
+        else:
+            #What does resultd mean?
+            resultd = {}
+            #This page uses the time box to show map played
+            resultd['date'] = datestring
+            resultd['map'] = result.find("div", {"class": "matchTimeCell"}).text.strip()
+            scores = result.find("div", {"class": "matchScoreCell"}).text.strip()
+            
+            #Team 1 info
+            team1div = result.find("div", {"class": "matchTeam1Cell"})
+            team1 = {}
+            team1['name'] = team1div.text.strip()
+            #I seem to get the ID slightly differently, still works fine though
+            team1href = team1div.select('a')[0].get('href')
+            team1['id'] = team1href.split("=")[-1]
+            team1['score'] = scores.split("-")[0].strip()
+            resultd['team1'] = team1
+
+            #Team 2 info
+            team2div = result.find("div", {"class": "matchTeam2Cell"})
+            team2 = {}
+            team2['name'] = team2div.text.strip()
+            team2href = team2div.select('a')[0].get('href')
+            team2['id'] = team2href.split("=")[-1]
+            team2['score'] = scores.split("-")[1].strip()
+            resultd['team2'] = team2
+
+            results_list.append(resultd)
+    return(results_list)
+            
+            
 if __name__ == "__main__":
-    print(get_matches())
+    print(get_results())
