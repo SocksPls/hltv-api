@@ -153,7 +153,10 @@ def get_matches():
                 team2href = team2div.select('a')[0].get('href')
                 team2["id"] = converters.to_int(team2href[team2href.index('teamid'):], regexp=True)
                 matchd['team2'] = team2
-                # TODO include link (id) to match page
+
+                # include link (id) to match page
+                matchd['matchid'] = match.find("div", {"class": "matchActionCell"}).find("a").get('href').split("-")[0].split("/")[-1] #What a fucking mess lmao
+                
                 matches_list.append(matchd)
             except:
                 # what does this do man?
@@ -196,6 +199,8 @@ def get_results():
             team2['score'] = converters.to_int(scores.split("-")[1].strip(), regexp=True)
             resultd['team2'] = team2
 
+            resultd['matchid'] = result.find("div", {"class": "matchActionCell"}).find("a").get('href').split("-")[0].split("/")[-1] #What a fucking mess lmao
+            
             results_list.append(resultd)
     return(results_list)
             
