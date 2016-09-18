@@ -155,7 +155,7 @@ def get_matches():
                 matchd['team2'] = team2
 
                 # include link (id) to match page
-                matchd['matchid'] = int(match.find("div", {"class": "matchActionCell"}).find("a").get('href').split("-")[0].split("/")[-1]) #What a fucking mess lmao
+                matchd['matchid'] = match.find("div", {"class": "matchActionCell"}).find("a").get('href') #What a fucking mess lmao
                 
                 matches_list.append(matchd)
             except:
@@ -199,7 +199,7 @@ def get_results():
             team2['score'] = converters.to_int(scores.split("-")[1].strip(), regexp=True)
             resultd['team2'] = team2
 
-            resultd['matchid'] = int(result.find("div", {"class": "matchActionCell"}).find("a").get('href').split("-")[0].split("/")[-1]) #What a fucking mess lmao
+            resultd['matchid'] = result.find("div", {"class": "matchActionCell"}).find("a").get('href') #What a fucking mess lmao
             
             results_list.append(resultd)
     return(results_list)
