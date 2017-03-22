@@ -19,6 +19,8 @@ def top5teams():
 
 
 def top20teams():
+    #HLTV is updated to show top 30 teams on this page, not sure what this returns now though
+    #Will do more testing
     page = get_parsed_page("http://www.hltv.org/ranking/teams/")
     teams = page.select("div.ranking-box")
     teamlist = []
