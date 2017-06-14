@@ -11,9 +11,9 @@ def top5teams():
     home = get_parsed_page("http://hltv.org/")
     count = 0
     teams = []
-    for team in home.find_all("div", {"class": "vsbox", })[:5]:
+    for team in home.find_all("div", {"class": ["col-box rank"], }):
         count += 1
-        teamname = team.find_all("div")[2].text.strip()
+        teamname = team.text[3:]
         teams.append(teamname)
     return teams
 
@@ -210,4 +210,4 @@ def get_results():
 if __name__ == "__main__":
     import pprint
     pp = pprint.PrettyPrinter()
-    pp.pprint(get_results())
+    pp.pprint(top5teams())
