@@ -18,30 +18,20 @@ def top5teams():
     return teams
 
 
-def top20teams():
-    #HLTV is updated to show top 30 teams on this page, not sure what this returns now though
-    #Will do more testing
+def top30teams():
     page = get_parsed_page("http://www.hltv.org/ranking/teams/")
-    teams = page.select("div.ranking-box")
+    teams = page.find("div", {"class": "ranking"})
     teamlist = []
-    for team in teams:
-        newteam = {'name': team.select('.ranking-teamName > a')[0].text.strip(),
-                   'rank': converters.to_int(team.select('.ranking-number')[0].text.strip(), regexp=True),
-                   'rank-points': converters.to_int(team.select('.ranking-teamName > span')[0].text, regexp=True),
-                   'team-id': converters.to_int(team.select('.ranking-delta')[0].get('id'), regexp=True),
+    for team in teams.find_all("div", {"class": "ranked-team standard-box"}):
+        newteam = {'name': team.find('div', {"class": "header"}).select('.name')[0].text.strip(),
+                   'rank': converters.to_int(team.select('.position')[0].text.strip(), regexp=True),
+                   'rank-points': converters.to_int(team.find('span', {'class': 'points'}).text, regexp=True),
+                   'team-id': converters.to_int(team.select('.name')[0]["data-url"].split("/")[2], regexp=True),
                    'team-players': []}
-        for player_div in team.select('.ranking-lineup > div'):
+        for player_div in team.find_all("td", {"class": "player-holder"}):
             player = {}
-            player_anchor = player_div.select('.ranking-playerNick > a')[0]
-            player['name'] = player_anchor.text.strip()
-            player_link = player_anchor.get('href')
-            if 'pageid' in player_link:
-                player['player-id'] = converters.to_int(player_link[player_link.index('playerid'):], regexp=True)
-            else:
-                player['player-id'] = converters.to_int(player_link, regexp=True)
-            if player['name'].startswith("[email"):
-                player_page = get_parsed_page(str("http://www.hltv.org" + player_anchor['href']))
-                player['name'] = player_page.title.text.split()[0]
+            player['name'] = player_div.find('img', {'class': 'playerPicture'})['title']
+            player['player-id'] = converters.to_int(player_div.find('span', {"class": "js-link"})['data-url'].split("/")[2])
             newteam['team-players'].append(player)
         teamlist.append(newteam)
     return teamlist
@@ -210,4 +200,4 @@ def get_results():
 if __name__ == "__main__":
     import pprint
     pp = pprint.PrettyPrinter()
-    pp.pprint(top5teams())
+    pp.pprint(top30teams())
