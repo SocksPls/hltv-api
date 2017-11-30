@@ -7,9 +7,10 @@ It is being updated though, slowly.
 
 `top5teams`  
 `top30teams`  
-~~`top_players`~~  
-~~`get_players`~~  
-~~`get_team_info`~~  
-~~`_get_lineup`~~  
-~~`get_matches`~~  
-~~`get_results`~~ 
+`top_players`  
+`get_players`  
+`get_team_info`  
+`_get_current_lineup`
+`_get_historical_lineup`  
+`get_matches`  
+`get_results`
