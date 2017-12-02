@@ -1,5 +1,6 @@
 import re
 import requests
+import datetime
 from bs4 import BeautifulSoup
 from python_utils import converters
 
@@ -170,7 +171,7 @@ def get_results():
 
     results_list = []
 
-    pastresults = results.find("div", {"class": "results-holder"}).find("div", {"class": "results-all"}).find_all("div", {"class": "results-sublist"})
+    pastresults = results.find_all("div", {"class": "results-holder"})
 
     for result in pastresults:
         resultDiv = result.find_all("div", {"class": "result-con"})
@@ -180,7 +181,11 @@ def get_results():
 
             resultObj = {}
 
-            resultObj['date'] = result.find("span", {"class": "standard-headline"}).text.encode('utf8')
+            if (res.parent.find("span", {"class": "standard-headline"})):
+                resultObj['date'] = res.parent.find("span", {"class": "standard-headline"}).text.encode('utf8')
+            else:
+                dt = datetime.date.today()
+                resultObj['date'] = str(dt.day) + '/' + str(dt.month) + '/' + str(dt.year)
 
             if (res.find("td", {"class": "placeholder-text-cell"})):
                 resultObj['event'] = res.find("td", {"class": "placeholder-text-cell"}).text.encode('utf8')
