@@ -196,9 +196,9 @@ def get_results():
 
             if (res.find_all("td", {"class": "team-cell"})):
                 resultObj['team1'] = res.find_all("td", {"class": "team-cell"})[0].text.encode('utf8').lstrip().rstrip()
-                resultObj['team1score'] = res.find("td", {"class": "result-score"}).find_all("span")[0].text.encode('utf8').lstrip().rstrip()
+                resultObj['team1score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[0].text.encode('utf8').lstrip().rstrip())
                 resultObj['team2'] = res.find_all("td", {"class": "team-cell"})[1].text.encode('utf8').lstrip().rstrip()
-                resultObj['team2score'] = res.find("td", {"class": "result-score"}).find_all("span")[1].text.encode('utf8').lstrip().rstrip()
+                resultObj['team2score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[1].text.encode('utf8').lstrip().rstrip())
             else:
                 resultObj['team1'] = None
                 resultObj['team2'] = None
@@ -217,18 +217,18 @@ if __name__ == "__main__":
     #
     # pp.pprint('top30')
     # pp.pprint(top30teams())
-
+    #
     # pp.pprint('top_players')
     # pp.pprint(top_players())
-
+    #
     # pp.pprint('get_players')
     # pp.pprint(get_players('6137'))
-
+    #
     # pp.pprint('get_team_info')
     # pp.pprint(get_team_info('6137'))
-
+    #
     # pp.pprint('get_matches')
     # pp.pprint(get_matches())
-
+    #
     # pp.pprint('get_results')
     # pp.pprint(get_results())
