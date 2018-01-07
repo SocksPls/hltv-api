@@ -212,23 +212,23 @@ if __name__ == "__main__":
     import pprint
     pp = pprint.PrettyPrinter()
 
-    # pp.pprint('top5')
-    # pp.pprint(top5teams())
-    #
-    # pp.pprint('top30')
-    # pp.pprint(top30teams())
-    #
-    # pp.pprint('top_players')
-    # pp.pprint(top_players())
-    #
-    # pp.pprint('get_players')
-    # pp.pprint(get_players('6137'))
-    #
-    # pp.pprint('get_team_info')
-    # pp.pprint(get_team_info('6137'))
-    #
-    # pp.pprint('get_matches')
-    # pp.pprint(get_matches())
-    #
-    # pp.pprint('get_results')
-    # pp.pprint(get_results())
+    pp.pprint('top5')
+    pp.pprint(top5teams())
+
+    pp.pprint('top30')
+    pp.pprint(top30teams())
+
+    pp.pprint('top_players')
+    pp.pprint(top_players())
+
+    pp.pprint('get_players')
+    pp.pprint(get_players('6137'))
+
+    pp.pprint('get_team_info')
+    pp.pprint(get_team_info('6137'))
+
+    pp.pprint('get_matches')
+    pp.pprint(get_matches())
+
+    pp.pprint('get_results')
+    pp.pprint(get_results())
