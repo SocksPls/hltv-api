@@ -60,8 +60,9 @@ def get_players(teamid):
     page = get_parsed_page("http://www.hltv.org/?pageid=362&teamid=" + teamid)
     titlebox = page.find("div", {"class": "teamProfile"})
     players = []
-    for player in titlebox.find_all("div", {"class": "standard-box overlayImageFrame"}):
-        players.append(player.text.strip().encode('utf8'))
+    for player in titlebox.find_all("div", {"class": "bodyshot-team"}):
+        players = player.text.strip().encode('utf8').split('\n\n\n\n')
+    players = [x.strip(' ') for x in players]
     return players
 
 
