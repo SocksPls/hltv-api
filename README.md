@@ -38,13 +38,6 @@ Provides an API for HLTV
 {'stats': {'Maps played': '466', 'K/D Ratio': '1.06', 'Total deaths': '40328', 'Wins / draws / losses': '279 / 1 / 186', 'Total kills': '42711', 'Rounds played': '12212'}, 'current-lineup': [{'maps-played': 314, 'country': 'Denmark', 'nickname': 'karrigan', 'name': 'Finn Andersen'}, {'maps-played': 141, 'country': 'Sweden', 'nickname': 'olofmeister', 'name': 'Olof Kajbjer'}, {'maps-played': 141, 'country': 'Slovakia', 'nickname': 'GuardiaN', 'name': 'Ladislav Kov\xc3\xa1cs'}, {'maps-played': 237, 'country': 'Bosnia and Herzegovina', 'nickname': 'NiKo', 'name': 'Nikola Kova\xc4\x8d'}, {'maps-played': 466, 'country': 'Norway', 'nickname': 'rain', 'name': 'H\xc3\xa5vard Nygaard'}], 'team-name': 'FaZe', 'historical-players': [{'maps-played': 25, 'country': 'Sweden', 'nickname': 'Maikelele', 'name': 'Mikail Bill'}, {'maps-played': 88, 'country': 'Portugal', 'nickname': 'fox', 'name': 'Ricardo Pacheco'}, {'maps-played': 237, 'country': 'Finland', 'nickname': 'allu', 'name': 'Aleksi Jalli'}, {'maps-played': 180, 'country': 'Norway', 'nickname': 'jkaem', 'name': 'Joakim Myrbostad'}, {'maps-played': 218, 'country': 'Denmark', 'nickname': 'aizy', 'name': 'Philip Aistrup'}, {'maps-played': 280, 'country': 'France', 'nickname': 'kioShiMa', 'name': 'Fabien Fiey'}, {'maps-played': 2, 'country': 'Sweden', 'nickname': 'RobbaN', 'name': 'Robert Dahlstr\xc3\xb6m'}, {'maps-played': 2, 'country': 'Denmark', 'nickname': 'TENZKI', 'name': 'Jesper Plougmann'}, {'maps-played': 1, 'country': 'Sweden', 'nickname': 'zbM', 'name': 'Zebastian Molinder'}]}
 ```
 
-## `_get_current_lineup`  
-Used internally, don't use this
-
-## `_get_historical_lineup`  
-See above
-
-
 ## `get_matches`  
 
 ```python
