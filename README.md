@@ -27,7 +27,7 @@ Provides an API for HLTV
 ## `get_players`  
 
 ```python
->>> hltv.get_players("6667")
+>>> hltv.get_players("6665")
 ['karrigan', 'olofmeister', 'GuardiaN', 'NiKo', 'rain']
 ```
 
@@ -50,4 +50,11 @@ Provides an API for HLTV
 ```python
 >>> hltv.get_results()
 [{'team2score': 16, 'team1': 'AGO', 'team2': 'G2', 'team1score': 8, 'date': '15/2/2018', 'event': 'ESL Pro League Season 7 Europe'}, ... ]
+```
+
+## `get_results_by_date`
+
+```python
+>>> hltv.get_results_by_date()
+[{'team2score': 16, 'team1': 'AGO', 'team2': 'G2', 'team1score': 8, 'map': 'Inferno', 'date': '2018-2-15', 'event': 'ESL Pro League Season 7 Europe'}, ... ]
 ```
