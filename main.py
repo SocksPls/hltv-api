@@ -6,7 +6,13 @@ from python_utils import converters
 
 
 def get_parsed_page(url):
-    return BeautifulSoup(requests.get(url).text, "lxml")
+    # This fixes a blocked by cloudflare error i've encountered
+    headers = {
+        "referer": "https://www.hltv.org/stats",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    }
+
+    return BeautifulSoup(requests.get(url, headers=headers).text, "lxml")
 
 
 def top5teams():
@@ -208,6 +214,46 @@ def get_results():
 
     return results_list
 
+def get_results_by_date(start_date, end_date):
+    # Dates like yyyy-mm-dd  (iso)
+    results_list = []
+    offset = 0
+    # Loop through all stats pages
+    while True:
+        url = "https://www.hltv.org/stats/matches?startDate="+start_date+"&endDate="+end_date+"&offset="+str(offset)
+
+        results = get_parsed_page(url)
+
+        # Total amount of results of the query
+        amount = int(results.find("span", attrs={"class": "pagination-data"}).text.split("of")[1].strip())
+
+        # All rows (<tr>s) of the match table
+        pastresults = results.find("tbody").find_all("tr")
+
+        # Parse each <tr> element to a result dictionary
+        for result in pastresults:
+            team_cols = result.find_all("td", {"class": "team-col"})
+            t1 = team_cols[0].find("a").text
+            t2 = team_cols[1].find("a").text
+            t1_score = int(team_cols[0].find_all(attrs={"class": "score"})[0].text.strip()[1:-1])
+            t2_score = int(team_cols[1].find_all(attrs={"class": "score"})[0].text.strip()[1:-1])
+            map = result.find(attrs={"class": "statsDetail"}).find(attrs={"class": "dynamic-map-name-full"}).text
+            event = result.find(attrs={"class": "event-col"}).text
+            date = result.find(attrs={"class": "date-col"}).find("a").find("div").text
+
+            result_dict = {"team1": t1, "team2": t2, "team1score": t1_score,
+                           "team2score": t2_score, "date": date, "map": map, "event": event}
+
+            # Add this pages results to the result list
+            results_list.append(result_dict)
+
+        # Get the next 50 results (next page) or break
+        if offset < amount:
+            offset += 50
+        else:
+            break
+
+    return results_list
 
 if __name__ == "__main__":
     import pprint
@@ -233,3 +279,8 @@ if __name__ == "__main__":
 
     pp.pprint('get_results')
     pp.pprint(get_results())
+
+    pp.pprint('get_results_by_date')
+    today_iso = datetime.datetime.today().isoformat().split('T')[0]
+    pp.pprint(get_results_by_date(today_iso, today_iso))
+   

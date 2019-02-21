@@ -51,3 +51,10 @@ Provides an API for HLTV
 >>> hltv.get_results()
 [{'team2score': 16, 'team1': 'AGO', 'team2': 'G2', 'team1score': 8, 'date': '15/2/2018', 'event': 'ESL Pro League Season 7 Europe'}, ... ]
 ```
+
+## `get_results_by_date`
+
+```python
+>>> hltv.get_results_by_date()
+[{'team2score': 16, 'team1': 'AGO', 'team2': 'G2', 'team1score': 8, 'map': 'Inferno', 'date': '2018-2-15', 'event': 'ESL Pro League Season 7 Europe'}, ... ]
+```
