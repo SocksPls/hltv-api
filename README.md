@@ -27,7 +27,7 @@ Provides an API for HLTV
 ## `get_players`  
 
 ```python
->>> hltv.get_players("6667")
+>>> hltv.get_players("6665")
 ['karrigan', 'olofmeister', 'GuardiaN', 'NiKo', 'rain']
 ```
 

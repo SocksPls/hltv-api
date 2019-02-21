@@ -31,15 +31,15 @@ def top30teams():
     teams = page.find("div", {"class": "ranking"})
     teamlist = []
     for team in teams.find_all("div", {"class": "ranked-team standard-box"}):
-        newteam = {'name': team.find('div', {"class": "header"}).select('.name')[0].text.strip(),
+        newteam = {'name': team.find('div', {"class": "ranking-header"}).select('.name')[0].text.strip(),
                    'rank': converters.to_int(team.select('.position')[0].text.strip(), regexp=True),
                    'rank-points': converters.to_int(team.find('span', {'class': 'points'}).text, regexp=True),
-                   'team-id': converters.to_int(team.select('.name')[0]["data-url"].split("/")[2], regexp=True),
+                   'team-id': converters.to_int(team.find('a', {'class': 'details moreLink'})['href'].split('/')[-1]),
                    'team-players': []}
         for player_div in team.find_all("td", {"class": "player-holder"}):
             player = {}
             player['name'] = player_div.find('img', {'class': 'playerPicture'})['title']
-            player['player-id'] = converters.to_int(player_div.find('span', {"class": "js-link"})['data-url'].split("/")[2])
+            player['player-id'] = converters.to_int(player_div.select('.pointer')[0]['href'].split("/")[-2])
             newteam['team-players'].append(player)
         teamlist.append(newteam)
     return teamlist
@@ -51,8 +51,8 @@ def top_players():
     playersArray = []
     for player in players.find_all("div", {"class": "top-x-box standard-box"}):
         playerObj = {}
-        playerObj['country'] = player.find('img', {'class': 'flag country gtSmartphone-only'})['alt'].encode('utf8')
-        buildName = player.find('img', {'class': 'img'})['alt'].encode('utf8').split('\'')
+        playerObj['country'] = player.find_all('img')[1]['alt'].encode('utf8')
+        buildName = player.find('img', {'class': 'img'})['alt'].split("'")
         playerObj['name'] = buildName[0].rstrip() + buildName[2]
         playerObj['nickname'] = player.find('a', {'class': 'name'}).text.encode('utf8')
         playerObj['rating'] = player.find('div', {'class': 'rating'}).find('span', {'class': 'bold'}).text.encode('utf8')
@@ -63,12 +63,12 @@ def top_players():
 
 
 def get_players(teamid):
-    page = get_parsed_page("http://www.hltv.org/?pageid=362&teamid=" + teamid)
-    titlebox = page.find("div", {"class": "teamProfile"})
+    page = get_parsed_page("http://www.hltv.org/?pageid=362&teamid=" + str(teamid))
+    titlebox = page.find("div", {"class": "bodyshot-team"})
     players = []
-    for player in titlebox.find_all("div", {"class": "bodyshot-team"}):
-        players = player.text.strip().encode('utf8').split('\n\n\n\n')
-    players = [x.strip(' ') for x in players]
+    for player_link in titlebox.find_all("a"):
+        players.append(player_link['title'])
+
     return players
 
 
@@ -114,11 +114,11 @@ def _get_current_lineup(player_anchors):
     players = []
     for player_anchor in player_anchors[0:5]:
         player = {}
-        buildName = player_anchor.find("img", {"class": "container-width"})["alt"].encode('utf8').split('\'')
-        player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"].encode('utf8')
+        buildName = player_anchor.find("img", {"class": "container-width"})["alt"].split('\'')
+        player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"]
         player['name'] = buildName[0].rstrip() + buildName[2]
-        player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text.encode('utf8')
-        player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text.encode('utf8')).group())
+        player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text
+        player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text).group())
         players.append(player)
     return players
 
@@ -130,11 +130,11 @@ def _get_historical_lineup(player_anchors):
     players = []
     for player_anchor in player_anchors[5::]:
         player = {}
-        buildName = player_anchor.find("img", {"class": "container-width"})["alt"].encode('utf8').split('\'')
+        buildName = player_anchor.find("img", {"class": "container-width"})["alt"].split('\'')
         player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"].encode('utf8')
         player['name'] = buildName[0].rstrip() + buildName[2]
         player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text.encode('utf8')
-        player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text.encode('utf8')).group())
+        player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text).group())
         players.append(player)
     return players
 
@@ -258,21 +258,21 @@ def get_results_by_date(start_date, end_date):
 if __name__ == "__main__":
     import pprint
     pp = pprint.PrettyPrinter()
-
+    
     pp.pprint('top5')
     pp.pprint(top5teams())
 
     pp.pprint('top30')
     pp.pprint(top30teams())
-
+    
     pp.pprint('top_players')
     pp.pprint(top_players())
-
+    
     pp.pprint('get_players')
-    pp.pprint(get_players('6137'))
-
+    pp.pprint(get_players('6665'))
+    
     pp.pprint('get_team_info')
-    pp.pprint(get_team_info('6137'))
+    pp.pprint(get_team_info('6665'))
 
     pp.pprint('get_matches')
     pp.pprint(get_matches())
