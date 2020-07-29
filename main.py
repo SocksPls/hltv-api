@@ -142,29 +142,26 @@ def _get_historical_lineup(player_anchors):
 def get_matches():
     matches = get_parsed_page("http://www.hltv.org/matches/")
     matches_list = []
-    upcomingmatches = matches.find("div", {"class": "upcoming-matches"})
+    upcomingmatches = matches.find("div", {"class": "upcomingMatchesSection"})
 
-    matchdays = upcomingmatches.find_all("div", {"class": "match-day"})
+    matchdays = matches.find_all("div", {"class": "upcomingMatchesSection"})
 
     for match in matchdays:
-        matchDetails = match.find_all("table", {"class": "table"})
-
+        matchDetails = match.find_all("div", {"class": "upcomingMatch"})
+        date = match.find({'span': {'class': 'matchDayHeadline'}}).text.split()[-1]
         for getMatch in matchDetails:
             matchObj = {}
 
-            matchObj['date'] = match.find("span", {"class": "standard-headline"}).text.encode('utf8')
-            matchObj['time'] = getMatch.find("td", {"class": "time"}).text.encode('utf8').lstrip().rstrip()
-
-            if (getMatch.find("td", {"class": "placeholder-text-cell"})):
-                matchObj['event'] = getMatch.find("td", {"class": "placeholder-text-cell"}).text.encode('utf8')
-            elif (getMatch.find("td", {"class": "event"})):
-                matchObj['event'] = getMatch.find("td", {"class": "event"}).text.encode('utf8')
+            matchObj['date'] = date
+            matchObj['time'] = getMatch.find("div", {"class": "matchTime"}).text
+            if getMatch.find("div", {"class": "matchEvent"}):
+                matchObj['event'] = getMatch.find("div", {"class": "matchEvent"}).text.encode('utf8').strip()
             else:
-                matchObj['event'] = None
+                matchObj['event'] = getMatch.find("div", {"class": "matchInfoEmpty"}).text.encode('utf8').strip()
 
-            if (getMatch.find_all("td", {"class": "team-cell"})):
-                matchObj['team1'] = getMatch.find_all("td", {"class": "team-cell"})[0].text.encode('utf8').lstrip().rstrip()
-                matchObj['team2'] = getMatch.find_all("td", {"class": "team-cell"})[1].text.encode('utf8').lstrip().rstrip()
+            if (getMatch.find_all("div", {"class": "matchTeams"})):
+                matchObj['team1'] = getMatch.find_all("div", {"class": "matchTeam"})[0].text.encode('utf8').lstrip().rstrip()
+                matchObj['team2'] = getMatch.find_all("div", {"class": "matchTeam"})[1].text.encode('utf8').lstrip().rstrip()
             else:
                 matchObj['team1'] = None
                 matchObj['team2'] = None
@@ -258,19 +255,19 @@ def get_results_by_date(start_date, end_date):
 if __name__ == "__main__":
     import pprint
     pp = pprint.PrettyPrinter()
-    
+
     pp.pprint('top5')
     pp.pprint(top5teams())
 
     pp.pprint('top30')
     pp.pprint(top30teams())
-    
+
     pp.pprint('top_players')
     pp.pprint(top_players())
-    
+
     pp.pprint('get_players')
     pp.pprint(get_players('6665'))
-    
+
     pp.pprint('get_team_info')
     pp.pprint(get_team_info('6665'))
 
@@ -283,4 +280,3 @@ if __name__ == "__main__":
     pp.pprint('get_results_by_date')
     today_iso = datetime.datetime.today().isoformat().split('T')[0]
     pp.pprint(get_results_by_date(today_iso, today_iso))
-   
