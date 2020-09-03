@@ -65,11 +65,15 @@ def top_players():
 def get_players(teamid):
     page = get_parsed_page("http://www.hltv.org/?pageid=362&teamid=" + str(teamid))
     titlebox = page.find("div", {"class": "bodyshot-team"})
-    players = []
+    playersArray = []
+    pattern = "\/player\/(.*?)\/"
     for player_link in titlebox.find_all("a"):
-        players.append(player_link['title'])
+        playerObj = {}
+        playerObj['id'] = re.search(pattern, player_link["href"]).group(1)
+        playerObj['nickname'] = player_link['title']
+        playersArray.append(playerObj)
 
-    return players
+    return playersArray
 
 
 def get_team_info(teamid):
@@ -112,13 +116,16 @@ def _get_current_lineup(player_anchors):
     :return: list of players
     """
     players = []
+    pattern = "\/players\/(.*?)\/"
     for player_anchor in player_anchors[0:5]:
         player = {}
+        player_link = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("a", {"class": "image-and-label"})["href"]
         buildName = player_anchor.find("img", {"class": "container-width"})["alt"].split('\'')
         player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"]
         player['name'] = buildName[0].rstrip() + buildName[2]
         player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text
         player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text).group())
+        player['id'] = re.search(pattern, player_link).group(1)
         players.append(player)
     return players
 
