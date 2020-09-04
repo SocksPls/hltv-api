@@ -76,6 +76,25 @@ def get_players(teamid):
     return playersArray
 
 
+def get_player_info(playerid):
+    """
+    :param playerid: integer (or string consisting of integers)
+    :return: dictionary of player
+
+    example player id: 7398 (dupreeh)
+    """
+    page = get_parsed_page(f"https://www.hltv.org/stats/players/{playerid}/-")
+
+    player_info = {}
+    player_info['nickname'] = page.find("h1", {"class": "summaryNickname text-ellipsis"}).text.encode('utf8')
+    player_info['name'] = page.find("div", {"class": "text-ellipsis"}).text[1:-1].encode('utf8')
+    player_info['country'] = page.find("img", {"class": "flag"})["alt"]
+    player_info['team'] = page.find("a", {"class": "a-reset text-ellipsis"}).text.encode('utf8')
+    player_info['age'] = int(page.find("div", {"class": "summaryPlayerAge"}).text[:2])
+    
+    return player_info
+    
+
 def get_team_info(teamid):
     """
     :param teamid: integer (or string consisting of integers)
@@ -86,7 +105,7 @@ def get_team_info(teamid):
     page = get_parsed_page("http://www.hltv.org/?pageid=179&teamid=" + str(teamid))
 
     team_info = {}
-    team_info['team-name']=page.find("div", {"class": "context-item"}).text.encode('utf8')
+    team_info['team-name'] = page.find("div", {"class": "context-item"}).text.encode('utf8')
 
     current_lineup = _get_current_lineup(page.find_all("div", {"class": "col teammate"}))
     team_info['current-lineup'] = current_lineup
@@ -137,11 +156,13 @@ def _get_historical_lineup(player_anchors):
     players = []
     for player_anchor in player_anchors[5::]:
         player = {}
+        player_link = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("a", {"class": "image-and-label"})["href"]
         buildName = player_anchor.find("img", {"class": "container-width"})["alt"].split('\'')
         player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"].encode('utf8')
         player['name'] = buildName[0].rstrip() + buildName[2]
         player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text.encode('utf8')
         player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text).group())
+        player['id'] = re.search(pattern, player_link).group(1)
         players.append(player)
     return players
 
