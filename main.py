@@ -110,23 +110,10 @@ def get_player_info(playerid):
     else:
         player_info['age'] = int(age[:2])
 
-    try:
-        player_info['total_kills'] = statistics[0].find_all("span")[1].text
-        player_info['headshot'] = statistics[1].find_all("span")[1].text
-        player_info['total_deaths'] = statistics[2].find_all("span")[1].text
-        player_info['kd_ratio'] = statistics[3].find_all("span")[1].text
-        player_info['dmg_round'] = statistics[4].find_all("span")[1].text
-        player_info['gren_dmg_round'] = statistics[5].find_all("span")[1].text
-        player_info['maps_played'] = statistics[6].find_all("span")[1].text
-        player_info['rounds_played'] = statistics[7].find_all("span")[1].text
-        player_info['kills_round'] = statistics[8].find_all("span")[1].text
-        player_info['assists_round'] = statistics[9].find_all("span")[1].text
-        player_info['deaths_round'] = statistics[10].find_all("span")[1].text
-        player_info['saved_by_teammate'] = statistics[11].find_all("span")[1].text
-        player_info['saved_teammates'] = statistics[12].find_all("span")[1].text
-        player_info['rating_1'] = statistics[13].find_all("span")[1].text
-    except IndexError:
-        return None
+    for stat in statistics:
+        stat_value = stat.find_all("span")[1].text.encode('utf8')
+        stat_title = stat.find_all("span")[0].text.encode('utf8')
+        player_info[stat_title] = stat_value
 
     return player_info
     
@@ -180,7 +167,7 @@ def _get_current_lineup(player_anchors):
         player['name'] = buildName[0].rstrip() + buildName[2]
         player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text
         player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text).group())
-        player['id'] = re.search(pattern, player_link).group(1)
+        player['id'] = int(re.search(pattern, player_link).group(1))
         players.append(player)
     return players
 
@@ -199,7 +186,7 @@ def _get_historical_lineup(player_anchors):
         player['name'] = buildName[0].rstrip() + buildName[2]
         player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text.encode('utf8')
         player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text).group())
-        player['id'] = re.search(pattern, player_link).group(1)
+        player['id'] = int(re.search(pattern, player_link).group(1))
         players.append(player)
     return players
 
