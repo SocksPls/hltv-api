@@ -79,10 +79,12 @@ def get_players(teamid):
 def get_player_info(playerid):
     """
     :param playerid: integer (or string consisting of integers)
-    :return: dictionary of player
+    :return: dictionary of player, None
 
     example player id: 7398 (dupreeh)
     """
+
+    playerid = int(playerid)
     try:
         page = get_parsed_page(f"https://www.hltv.org/stats/players/{playerid}/-")
         short_info = page.find("div", {"class": "summaryShortInfo"})
@@ -97,10 +99,16 @@ def get_player_info(playerid):
     player_info['country'] = short_info.find("img", {"class": "flag"})["alt"]
 
     team = short_info.find("a", {"class": "a-reset text-ellipsis"})
-    player_info['team'] = "No team" if team is None else player_info['team'] = team.text.encode('utf8')
+    if team is None:
+        player_info['team'] = "No team"
+    else:
+        player_info['team'] = team.text.encode('utf8')
 
     age = short_info.find("div", {"class": "summaryPlayerAge"}).text
-    player_info['age'] = 0 if age is None else player_info['age'] = int(age[:2])
+    if age is '':
+        player_info['age'] = 0
+    else:
+        player_info['age'] = int(age[:2])
 
     try:
         player_info['total_kills'] = statistics[0].find_all("span")[1].text
@@ -182,6 +190,7 @@ def _get_historical_lineup(player_anchors):
     :return: list of players
     """
     players = []
+    pattern = "\/players\/(.*?)\/"
     for player_anchor in player_anchors[5::]:
         player = {}
         player_link = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("a", {"class": "image-and-label"})["href"]
@@ -323,6 +332,9 @@ if __name__ == "__main__":
 
     pp.pprint('get_players')
     pp.pprint(get_players('6665'))
+
+    pp.pprint('get_players')
+    pp.pprint(get_player_info('7398'))
 
     pp.pprint('get_team_info')
     pp.pprint(get_team_info('6665'))

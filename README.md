@@ -28,7 +28,14 @@ Provides an API for HLTV
 
 ```python
 >>> hltv.get_players("6665")
-['karrigan', 'olofmeister', 'GuardiaN', 'NiKo', 'rain']
+[{'id': '7398', 'nickname': 'dupreeh'}, {'id': '7412', 'nickname': 'gla1ve'}, {'id': '7592', 'nickname': 'device'}, {'id': '9032', 'nickname': 'Magisk'}, {'id': '9612', 'nickname': 'Bubzkji'}]
+```
+
+## `get_player_info`
+
+```python
+>>> hltv.get_player_info("7398")
+{'id': 7398, 'nickname': b'dupreeh', 'name': b'Peter Rasmussen', 'country': 'Denmark', 'team': b'Astralis', 'age': 27, 'total_kills': '31385', 'headshot': '50.5%', 'total_deaths': '27456', 'kd_ratio': '1.14', 'dmg_round': '78.4', 'gren_dmg_round': '3.0', 'maps_played': '1635', 'rounds_played': '42363', 'kills_round': '0.74', 'assists_round': '0.14', 'deaths_round': '0.65', 'saved_by_teammate': '0.10', 'saved_teammates': '0.09', 'rating_1': '1.09'}
 ```
 
 ## `get_team_info`  
