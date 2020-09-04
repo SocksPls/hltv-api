@@ -83,15 +83,43 @@ def get_player_info(playerid):
 
     example player id: 7398 (dupreeh)
     """
-    page = get_parsed_page(f"https://www.hltv.org/stats/players/{playerid}/-")
+    try:
+        page = get_parsed_page(f"https://www.hltv.org/stats/players/{playerid}/-")
+        short_info = page.find("div", {"class": "summaryShortInfo"})
+        statistics = page.find("div", {"class": "statistics"}).find_all("div", {"class": "stats-row"})
+    except AttributeError:
+        return None
 
     player_info = {}
-    player_info['nickname'] = page.find("h1", {"class": "summaryNickname text-ellipsis"}).text.encode('utf8')
-    player_info['name'] = page.find("div", {"class": "text-ellipsis"}).text[1:-1].encode('utf8')
-    player_info['country'] = page.find("img", {"class": "flag"})["alt"]
-    player_info['team'] = page.find("a", {"class": "a-reset text-ellipsis"}).text.encode('utf8')
-    player_info['age'] = int(page.find("div", {"class": "summaryPlayerAge"}).text[:2])
-    
+    player_info['id'] = playerid
+    player_info['nickname'] = short_info.find("h1", {"class": "summaryNickname text-ellipsis"}).text.encode('utf8')
+    player_info['name'] = short_info.find("div", {"class": "text-ellipsis"}).text[1:-1].encode('utf8')
+    player_info['country'] = short_info.find("img", {"class": "flag"})["alt"]
+
+    team = short_info.find("a", {"class": "a-reset text-ellipsis"})
+    player_info['team'] = "No team" if team is None else player_info['team'] = team.text.encode('utf8')
+
+    age = short_info.find("div", {"class": "summaryPlayerAge"}).text
+    player_info['age'] = 0 if age is None else player_info['age'] = int(age[:2])
+
+    try:
+        player_info['total_kills'] = statistics[0].find_all("span")[1].text
+        player_info['headshot'] = statistics[1].find_all("span")[1].text
+        player_info['total_deaths'] = statistics[2].find_all("span")[1].text
+        player_info['kd_ratio'] = statistics[3].find_all("span")[1].text
+        player_info['dmg_round'] = statistics[4].find_all("span")[1].text
+        player_info['gren_dmg_round'] = statistics[5].find_all("span")[1].text
+        player_info['maps_played'] = statistics[6].find_all("span")[1].text
+        player_info['rounds_played'] = statistics[7].find_all("span")[1].text
+        player_info['kills_round'] = statistics[8].find_all("span")[1].text
+        player_info['assists_round'] = statistics[9].find_all("span")[1].text
+        player_info['deaths_round'] = statistics[10].find_all("span")[1].text
+        player_info['saved_by_teammate'] = statistics[11].find_all("span")[1].text
+        player_info['saved_teammates'] = statistics[12].find_all("span")[1].text
+        player_info['rating_1'] = statistics[13].find_all("span")[1].text
+    except IndexError:
+        return None
+
     return player_info
     
 
