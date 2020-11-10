@@ -59,7 +59,21 @@ Provides an API for HLTV
  'name': b'Peter Rasmussen',
  'country': 'Denmark',
  'team': b'Astralis',
- 'age': '27'}
+ 'age': '27',
+ 'stats': {'total_kills': '32442',
+  'headshot_percent': '50.6%',
+  'total_deaths': '28386',
+  'kd_ratio': '1.14',
+  'dmg_per_round': '78.2',
+  'grenade_dmg_per_round': '3.0',
+  'maps_played': '1690',
+  'rounds_played': '43830',
+  'kills_per_round': '0.74',
+  'assists_per_round': '0.14',
+  'deaths_per_round': '0.65',
+  'saved_by_teammate_per_round': '0.10',
+  'saved_teammates_per_round': '0.09',
+  'rating_1': '1.09'}}
 ```
 
 ## `get_team_info`  

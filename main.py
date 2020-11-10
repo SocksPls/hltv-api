@@ -84,12 +84,29 @@ def get_player_info(player_id):
     """
 
     page = get_parsed_page(f"https://www.hltv.org/stats/players/{player_id}/a")
+    statistics = page.find("div", {"class": "statistics"}).find_all("div", {"class": "stats-row"})
     player_info = {
         'nickname': page.find("h1", {"class": "summaryNickname text-ellipsis"}).text.encode('utf8'),
         'name': page.find("div", {"class": "text-ellipsis"}).text[1:-1].encode('utf8'),
         'country': page.find("img", {"class": "flag"})["alt"],
         'team': page.find("a", {"class": "a-reset text-ellipsis"}).text.encode('utf8'),
-        'age': page.find("div", {"class": "summaryPlayerAge"}).text[:2]
+        'age': page.find("div", {"class": "summaryPlayerAge"}).text[:2],
+        'stats': {
+            'total_kills': statistics[0].find_all("span")[1].text,
+            'headshot_percent': statistics[1].find_all("span")[1].text,
+            'total_deaths': statistics[2].find_all("span")[1].text,
+            'kd_ratio': statistics[3].find_all("span")[1].text,
+            'dmg_per_round': statistics[4].find_all("span")[1].text,
+            'grenade_dmg_per_round': statistics[5].find_all("span")[1].text,
+            'maps_played': statistics[6].find_all("span")[1].text,
+            'rounds_played': statistics[7].find_all("span")[1].text,
+            'kills_per_round': statistics[8].find_all("span")[1].text,
+            'assists_per_round': statistics[9].find_all("span")[1].text,
+            'deaths_per_round': statistics[10].find_all("span")[1].text,
+            'saved_by_teammate_per_round': statistics[11].find_all("span")[1].text,
+            'saved_teammates_per_round': statistics[12].find_all("span")[1].text,
+            'rating_1': statistics[13].find_all("span")[1].text,
+        }
     }
 
     return player_info
