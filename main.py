@@ -67,10 +67,32 @@ def get_players(teamid):
     titlebox = page.find("div", {"class": "bodyshot-team"})
     players = []
     for player_link in titlebox.find_all("a"):
-        players.append(player_link['title'])
+        players.append({
+            'id': player_link["href"].split("/")[2],
+            'nickname': player_link["title"],
+            'name': player_link.find("img")['title']
+        })
 
     return players
 
+def get_player_info(player_id):
+    """
+    :param player_id: integer (or string consisting of integers)
+    :return: dictionary of player
+
+    example player id: 7398 (dupreeh)
+    """
+
+    page = get_parsed_page(f"https://www.hltv.org/stats/players/{player_id}/a")
+    player_info = {
+        'nickname': page.find("h1", {"class": "summaryNickname text-ellipsis"}).text.encode('utf8'),
+        'name': page.find("div", {"class": "text-ellipsis"}).text[1:-1].encode('utf8'),
+        'country': page.find("img", {"class": "flag"})["alt"],
+        'team': page.find("a", {"class": "a-reset text-ellipsis"}).text.encode('utf8'),
+        'age': page.find("div", {"class": "summaryPlayerAge"}).text[:2]
+    }
+
+    return player_info
 
 def get_team_info(teamid):
     """
