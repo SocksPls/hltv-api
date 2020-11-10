@@ -7,49 +7,195 @@ Provides an API for HLTV
 ```python
 >>> import main as hltv
 >>> hltv.top5teams()
-[u'FaZe', u'SK', u'Cloud9', u'G2', u'fnatic']
+['Vitality', 'Heroic', 'Astralis', 'Natus Vincere', 'BIG']
 ```
 
 ## `top30teams`  
 
 ```python
 >>> hltv.top30teams()
-[{'team-players': [{'name': "Finn 'karrigan' Andersen", 'player-id': 429}, {'name': "Olof 'olofmeister' Kajbjer", 'player-id': 885}, {'name': u"Ladislav 'GuardiaN' Kov\xe1cs", 'player-id': 2757}, {'name': u"Nikola 'NiKo' Kova\u010d", 'player-id': 3741}, {'name': u"H\xe5vard 'rain' Nygaard", 'player-id': 8183}], 'team-id': 6667, 'name': u'FaZe', 'rank': 1, 'rank-points': 919}, ... ]
+[{'name': 'Vitality',
+  'rank': 1,
+  'rank-points': 913,
+  'team-id': 9565,
+  'team-players': [{'name': "Richard 'shox' Papillon", 'player-id': 1225},
+   {'name': "Cédric 'RpK' Guipouy", 'player-id': 7169},
+   {'name': "Dan 'apEX' Madesclaire", 'player-id': 7322},
+   {'name': "Mathieu 'ZywOo' Herbaut", 'player-id': 11893},
+   {'name': "Kévin 'misutaaa' Rabier", 'player-id': 14176}]},
+  ...
+}]
 ```
 
 ## `top_players`  
 
 ```python
 >>> hltv.top_players()
-[{'maps-played': '685', 'country': 'Turkey', 'nickname': 'XANTARES', 'name': 'Ismailcan D\xc3\xb6rtkarde\xc5\x9f', 'rating': '1.25'}, ... ]
+[{'country': b'France',
+  'name': 'Mathieu Herbaut',
+  'nickname': b'ZywOo',
+  'rating': b'1.28',
+  'maps-played': b'733'},
+  ...
+}]
 ```
 
 ## `get_players`  
 
 ```python
 >>> hltv.get_players("6665")
-['karrigan', 'olofmeister', 'GuardiaN', 'NiKo', 'rain']
+[{'id': '4954', 'nickname': 'Xyp9x', 'name': "Andreas 'Xyp9x' Højsleth"},
+ {'id': '7398', 'nickname': 'dupreeh', 'name': "Peter 'dupreeh' Rasmussen"},
+ {'id': '7412', 'nickname': 'gla1ve', 'name': "Lukas 'gla1ve' Rossander"},
+ {'id': '7592', 'nickname': 'device', 'name': "Nicolai 'device' Reedtz"},
+ {'id': '9032', 'nickname': 'Magisk', 'name': "Emil 'Magisk' Reif"}]
+```
+
+## `get_player_info`
+
+```python
+>>>hltv.get_player_info('7398')
+{'nickname': b'dupreeh',
+ 'name': b'Peter Rasmussen',
+ 'country': 'Denmark',
+ 'team': b'Astralis',
+ 'age': '27'}
 ```
 
 ## `get_team_info`  
 
 ```python
 >>> hltv.get_team_info("6667")
-{'stats': {'Maps played': '466', 'K/D Ratio': '1.06', 'Total deaths': '40328', 'Wins / draws / losses': '279 / 1 / 186', 'Total kills': '42711', 'Rounds played': '12212'}, 'current-lineup': [{'maps-played': 314, 'country': 'Denmark', 'nickname': 'karrigan', 'name': 'Finn Andersen'}, {'maps-played': 141, 'country': 'Sweden', 'nickname': 'olofmeister', 'name': 'Olof Kajbjer'}, {'maps-played': 141, 'country': 'Slovakia', 'nickname': 'GuardiaN', 'name': 'Ladislav Kov\xc3\xa1cs'}, {'maps-played': 237, 'country': 'Bosnia and Herzegovina', 'nickname': 'NiKo', 'name': 'Nikola Kova\xc4\x8d'}, {'maps-played': 466, 'country': 'Norway', 'nickname': 'rain', 'name': 'H\xc3\xa5vard Nygaard'}], 'team-name': 'FaZe', 'historical-players': [{'maps-played': 25, 'country': 'Sweden', 'nickname': 'Maikelele', 'name': 'Mikail Bill'}, {'maps-played': 88, 'country': 'Portugal', 'nickname': 'fox', 'name': 'Ricardo Pacheco'}, {'maps-played': 237, 'country': 'Finland', 'nickname': 'allu', 'name': 'Aleksi Jalli'}, {'maps-played': 180, 'country': 'Norway', 'nickname': 'jkaem', 'name': 'Joakim Myrbostad'}, {'maps-played': 218, 'country': 'Denmark', 'nickname': 'aizy', 'name': 'Philip Aistrup'}, {'maps-played': 280, 'country': 'France', 'nickname': 'kioShiMa', 'name': 'Fabien Fiey'}, {'maps-played': 2, 'country': 'Sweden', 'nickname': 'RobbaN', 'name': 'Robert Dahlstr\xc3\xb6m'}, {'maps-played': 2, 'country': 'Denmark', 'nickname': 'TENZKI', 'name': 'Jesper Plougmann'}, {'maps-played': 1, 'country': 'Sweden', 'nickname': 'zbM', 'name': 'Zebastian Molinder'}]}
+{'team-name': b'FaZe',
+ 'current-lineup': [{'country': 'Sweden',
+   'name': 'Olof Kajbjer',
+   'nickname': 'olofmeister',
+   'maps-played': 543},
+  {'country': 'Norway',
+   'name': 'Håvard Nygaard',
+   'nickname': 'rain',
+   'maps-played': 1044},
+  {'country': 'Denmark',
+   'name': 'Markus Kjærbye',
+   'nickname': 'Kjaerbye',
+   'maps-played': 59},
+  {'country': 'Brazil',
+   'name': 'Marcelo David',
+   'nickname': 'coldzera',
+   'maps-played': 233},
+  {'country': 'Latvia',
+   'name': 'Helvijs Saukants',
+   'nickname': 'broky',
+   'maps-played': 233}],
+ 'historical-players': [{'country': b'Poland',
+   'name': 'Filip Kubski',
+   'nickname': b'NEO',
+   'maps-played': 45},
+  {'country': b'Slovakia',
+   'name': 'Ladislav Kovács',
+   'nickname': b'GuardiaN',
+   'maps-played': 484},
+  {'country': b'Lithuania',
+   'name': 'Aurimas Pipiras',
+   'nickname': b'Bymas',
+   'maps-played': 41},
+  {'country': b'Denmark',
+   'name': 'Finn Andersen',
+   'nickname': b'karrigan',
+   'maps-played': 548},
+  {'country': b'Kazakhstan',
+   'name': 'Dauren Kystaubayev',
+   'nickname': b'AdreN',
+   'maps-played': 65},
+  {'country': b'Sweden',
+   'name': 'Richard Landström',
+   'nickname': b'Xizt',
+   'maps-played': 59},
+  {'country': b'Sweden',
+   'name': 'Mikail Bill',
+   'nickname': b'Maikelele',
+   'maps-played': 25},
+  {'country': b'Portugal',
+   'name': 'Ricardo Pacheco',
+   'nickname': b'fox',
+   'maps-played': 88},
+  {'country': b'Finland',
+   'name': 'Aleksi Jalli',
+   'nickname': b'allu',
+   'maps-played': 237},
+  {'country': b'Norway',
+   'name': 'Joakim Myrbostad',
+   'nickname': b'jkaem',
+   'maps-played': 180},
+  {'country': b'Norway',
+   'name': 'Jorgen Robertsen',
+   'nickname': b'cromen',
+   'maps-played': 27},
+  {'country': b'Bosnia and Herzegovina',
+   'name': 'Nikola Kovač',
+   'nickname': b'NiKo',
+   'maps-played': 799},
+  {'country': b'Denmark',
+   'name': 'Philip Aistrup',
+   'nickname': b'aizy',
+   'maps-played': 218},
+  {'country': b'France',
+   'name': 'Fabien Fiey',
+   'nickname': b'kioShiMa',
+   'maps-played': 280},
+  {'country': b'Sweden',
+   'name': 'Robert Dahlström',
+   'nickname': b'RobbaN',
+   'maps-played': 2},
+  {'country': b'Australia',
+   'name': 'Karlo Pivac',
+   'nickname': b'USTILO',
+   'maps-played': 1},
+  {'country': b'Denmark',
+   'name': 'Jesper Plougmann',
+   'nickname': b'TENZKI',
+   'maps-played': 2},
+  {'country': b'Serbia',
+   'name': 'Janko Paunović',
+   'nickname': b'YNk',
+   'maps-played': 8},
+  {'country': b'Sweden',
+   'name': 'Zebastian Molinder',
+   'nickname': b'zbM',
+   'maps-played': 1}],
+ 'stats': {b'Maps played': b'1044',
+  b'Wins / draws / losses': b'593 / 5 / 446',
+  b'Total kills': b'94441',
+  b'Total deaths': b'89842',
+  b'Rounds played': b'27494',
+  b'K/D Ratio': b'1.05'}}
 ```
 
 ## `get_matches`  
 
 ```python
 >>> hltv.get_matches()
-[{'date': '2018-02-15', 'team1': 'SEAL', 'event': 'CSesport.com Cup #3', 'team2': 'Space Jam', 'time': '16:00'}, {'date': '2018-02-15', 'team1': 'fnatic', 'event': 'ESL Pro League Season 7 Europe', 'team2': 'NiP', 'time': '17:00'}, ... ]
+[{'date': '2020-11-10',
+  'time': '15:00',
+  'event': b'IEM Beijing-Haidian 2020 Europe',
+  'team1': b'Spirit',
+  'team2': b'OG'},
+  ...
+}]
 ```
 
 ## `get_results`
 
 ```python
 >>> hltv.get_results()
-[{'team2score': 16, 'team1': 'AGO', 'team2': 'G2', 'team1score': 8, 'date': '15/2/2018', 'event': 'ESL Pro League Season 7 Europe'}, ... ]
+[{'date': '10/11/2020',
+  'event': b'IEM Beijing-Haidian 2020 North America',
+  'team1': b'Liquid',
+  'team1score': 2,
+  'team2': b'Chaos',
+  'team2score': 0},
+  ...
+}]
 ```
 
 ## `get_results_by_date`
