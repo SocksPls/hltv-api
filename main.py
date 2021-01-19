@@ -89,7 +89,7 @@ def get_player_info(player_id):
         'nickname': page.find("h1", {"class": "summaryNickname text-ellipsis"}).text.encode('utf8'),
         'name': page.find("div", {"class": "text-ellipsis"}).text[1:-1].encode('utf8'),
         'country': page.find("img", {"class": "flag"})["alt"],
-        'team': page.find("a", {"class": "a-reset text-ellipsis"}).text.encode('utf8'),
+        'team': page.find("div", {"class": "SummaryTeamname text-ellipsis"}).text.encode('utf8'),
         'age': page.find("div", {"class": "summaryPlayerAge"}).text[:2],
         'stats': {
             'total_kills': statistics[0].find_all("span")[1].text,
