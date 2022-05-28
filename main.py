@@ -3,7 +3,7 @@ import requests
 import datetime
 from bs4 import BeautifulSoup
 from python_utils import converters
-
+import time
 
 def get_parsed_page(url):
     # This fixes a blocked by cloudflare error i've encountered
@@ -11,6 +11,8 @@ def get_parsed_page(url):
         "referer": "https://www.hltv.org/stats",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
+
+    time.sleep(0.5)
 
     return BeautifulSoup(requests.get(url, headers=headers).text, "lxml")
 
