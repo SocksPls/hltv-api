@@ -299,13 +299,14 @@ Provides an API for HLTV
 
 ```python
 >>> hltv.get_matches()
-[{'date': '2020-11-10',
-  'time': '15:00',
-  'event': b'IEM Beijing-Haidian 2020 Europe',
-  'team1': b'Spirit',
-  'team2': b'OG'},
+[{'date': '2022-06-06',
+  'event': b'WePlay Academy League Season 4',
+  'team1': b'Astralis Talent',
+  'team2': b'Apeks Rebels',
+  'time': '18:10',
+  'url': 'https://hltv.org/matches/2356247/esl-impact-league-season-1-finals-grand-final-esl-impact-league-season-1-finals'},
   ...
-}]
+]
 ```
 
 ## `get_results`
