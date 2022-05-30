@@ -234,7 +234,7 @@ def get_matches():
             matchObj = {}
 
             matchObj['date'] = date
-            matchObj['url'] = "https://hltv.org" + match.find("a", {"class": "match a-reset"}).get("href")
+            matchObj['url'] = "https://hltv.org" + getMatch.find("a", {"class": "match a-reset"}).get("href")
             matchObj['time'] = getMatch.find("div", {"class": "matchTime"}).text
             if getMatch.find("div", {"class": "matchEvent"}):
                 matchObj['event'] = getMatch.find("div", {"class": "matchEvent"}).text.encode('utf8').strip()
