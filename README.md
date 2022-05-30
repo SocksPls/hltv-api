@@ -304,7 +304,7 @@ Provides an API for HLTV
   'team1': b'Astralis Talent',
   'team2': b'Apeks Rebels',
   'time': '18:10',
-  'url': 'https://hltv.org/matches/2356247/esl-impact-league-season-1-finals-grand-final-esl-impact-league-season-1-finals'},
+  'url': 'https://hltv.org/matches/2356500/astralis-talent-vs-apeks-rebels-weplay-academy-league-season-4'},
   ...
 ]
 ```
