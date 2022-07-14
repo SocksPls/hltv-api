@@ -181,6 +181,15 @@ def get_matches():
             matchObj['date'] = date
             matchObj['url'] = "https://hltv.org" + getMatch.find("a", {"class": "match a-reset"}).get("href")
             matchObj['time'] = getMatch.find("div", {"class": "matchTime"}).text
+            
+            if (matchObj['date'] and matchObj['time']):
+                timenow = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+                deadline = matchObj["date"] + " " + matchObj["time"]
+                start = datetime.datetime.strptime(timenow,'%Y-%m-%d %H:%M')
+                ends = datetime.datetime.strptime(deadline, '%Y-%m-%d %H:%M')
+
+                if start < ends:
+                    matchObj['countdown'] = str(ends - start)
 
             if getMatch.find("div", {"class": "matchEvent"}):
                 matchObj['event'] = getMatch.find("div", {"class": "matchEvent"}).text.strip()
