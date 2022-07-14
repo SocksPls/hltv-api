@@ -178,18 +178,19 @@ def get_matches():
         for getMatch in matchDetails:
             matchObj = {}
 
-            matchObj['date'] = date
             matchObj['url'] = "https://hltv.org" + getMatch.find("a", {"class": "match a-reset"}).get("href")
-            matchObj['time'] = getMatch.find("div", {"class": "matchTime"}).text
             
-            if (matchObj['date'] and matchObj['time']):
+            if (date and getMatch.find("div", {"class": "matchTime"})):
+                timeFromHLTV = datetime.datetime.strptime(date + " " + getMatch.find("div", {"class": "matchTime"}).text,'%Y-%m-%d %H:%M')
+                matchObj['date'] = timeFromHLTV.strftime('%Y-%m-%d')
+                matchObj['time'] = timeFromHLTV.strftime('%H:%M')
                 timenow = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                deadline = matchObj["date"] + " " + matchObj["time"]
-                start = datetime.datetime.strptime(timenow,'%Y-%m-%d %H:%M')
+                deadline = date + " " + getMatch.find("div", {"class": "matchTime"}).text
+                currentTime = datetime.datetime.strptime(timenow,'%Y-%m-%d %H:%M')
                 ends = datetime.datetime.strptime(deadline, '%Y-%m-%d %H:%M')
 
-                if start < ends:
-                    matchObj['countdown'] = str(ends - start)
+                if currentTime < ends:
+                    matchObj['countdown'] = str(ends - currentTime)
 
             if getMatch.find("div", {"class": "matchEvent"}):
                 matchObj['event'] = getMatch.find("div", {"class": "matchEvent"}).text.encode('utf8').strip()
@@ -224,10 +225,12 @@ def get_results():
 
             if (res.parent.find("span", {"class": "standard-headline"})):
                 dateText = res.parent.find("span", {"class": "standard-headline"}).text.replace("Results for ", "").replace("th", "")
+
                 dateArr = dateText.split()
 
                 dateTextFromArrPadded = padIfNeeded(dateArr[2]) + "-" + padIfNeeded(monthNameToNumber(dateArr[0])) + "-" + padIfNeeded(dateArr[1])
-                resultObj['date'] = dateTextFromArrPadded.encode('utf8')
+                timeFromHLTV = datetime.datetime.strptime(dateTextFromArrPadded,'%Y-%m-%d')
+                resultObj['date'] = timeFromHLTV.strftime('%Y-%m-%d')
             else:
                 dt = datetime.date.today()
                 resultObj['date'] = str(dt.day) + '/' + str(dt.month) + '/' + str(dt.year)
