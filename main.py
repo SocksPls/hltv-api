@@ -158,9 +158,9 @@ def _get_historical_lineup(player_anchors):
     for player_anchor in player_anchors[5::]:
         player = {}
         buildName = player_anchor.find("img", {"class": "container-width"})["alt"].split('\'')
-        player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"]
+        player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"].encode('utf8')
         player['name'] = buildName[0].rstrip() + buildName[2]
-        player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text
+        player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text.encode('utf8')
         player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text).group())
         players.append(player)
     return players
