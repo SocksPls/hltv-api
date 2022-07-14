@@ -4,6 +4,8 @@ import datetime
 from bs4 import BeautifulSoup
 from python_utils import converters
 import time
+import zoneinfo
+import tzlocal
 
 def padIfNeeded(numberStr: str):
     if int(numberStr) < 10:
@@ -181,10 +183,11 @@ def get_matches():
             matchObj['url'] = "https://hltv.org" + getMatch.find("a", {"class": "match a-reset"}).get("href")
             
             if (date and getMatch.find("div", {"class": "matchTime"})):
-                timeFromHLTV = datetime.datetime.strptime(date + " " + getMatch.find("div", {"class": "matchTime"}).text,'%Y-%m-%d %H:%M')
+                timeFromHLTV = datetime.datetime.strptime(date + " " + getMatch.find("div", {"class": "matchTime"}).text,'%Y-%m-%d %H:%M').replace(tzinfo=zoneinfo.ZoneInfo('Europe/Copenhagen'))
+                timeFromHLTV = timeFromHLTV.astimezone(zoneinfo.ZoneInfo(tzlocal.get_localzone_name()))
                 matchObj['date'] = timeFromHLTV.strftime('%Y-%m-%d')
                 matchObj['time'] = timeFromHLTV.strftime('%H:%M')
-                timenow = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+                timenow = datetime.datetime.now().astimezone(zoneinfo.ZoneInfo(tzlocal.get_localzone_name())).strftime('%Y-%m-%d %H:%M')
                 deadline = date + " " + getMatch.find("div", {"class": "matchTime"}).text
                 currentTime = datetime.datetime.strptime(timenow,'%Y-%m-%d %H:%M')
                 ends = datetime.datetime.strptime(deadline, '%Y-%m-%d %H:%M')
@@ -229,8 +232,10 @@ def get_results():
                 dateArr = dateText.split()
 
                 dateTextFromArrPadded = padIfNeeded(dateArr[2]) + "-" + padIfNeeded(monthNameToNumber(dateArr[0])) + "-" + padIfNeeded(dateArr[1])
-                timeFromHLTV = datetime.datetime.strptime(dateTextFromArrPadded,'%Y-%m-%d')
-                resultObj['date'] = timeFromHLTV.strftime('%Y-%m-%d')
+                dateFromHLTV = datetime.datetime.strptime(dateTextFromArrPadded,'%Y-%m-%d').replace(tzinfo=zoneinfo.ZoneInfo('Europe/Copenhagen'))
+                dateFromHLTV = dateFromHLTV.astimezone(zoneinfo.ZoneInfo(tzlocal.get_localzone_name()))
+
+                resultObj['date'] = dateFromHLTV.strftime('%Y-%m-%d')
             else:
                 dt = datetime.date.today()
                 resultObj['date'] = str(dt.day) + '/' + str(dt.month) + '/' + str(dt.year)
