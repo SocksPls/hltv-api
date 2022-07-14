@@ -334,6 +334,13 @@ def get_results_by_date(start_date, end_date):
 
     return results_list
 
+#Get the countdown timer off of the HLTV Matchpage
+def get_match_countdown(matchpage):
+    match = get_parsed_page(matchpage)
+    match_countdown = match.find("div", {"class": "countdown"}).text
+    
+    return match_countdown
+
 if __name__ == "__main__":
     import pprint
     pp = pprint.PrettyPrinter()
