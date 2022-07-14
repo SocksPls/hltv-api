@@ -69,7 +69,8 @@ def top30teams():
                    'rank': converters.to_int(team.select('.position')[0].text.strip(), regexp=True),
                    'rank-points': converters.to_int(team.find('span', {'class': 'points'}).text, regexp=True),
                    'team-id': converters.to_int(team.find('a', {'class': 'details moreLink'})['href'].split('/')[-1]),
-                    'url': "https://www.hltv.org" + team.find('a', {'class': 'details moreLink'})['href'],
+                   'team-url': "https://hltv.org/team/" + team.find('a', {'class': 'details moreLink'})['href'].split('/')[-1] + "/" + team.find('div', {"class": "ranking-header"}).select('.name')[0].text.strip(),
+                   'stats-url': "https://www.hltv.org" + team.find('a', {'class': 'details moreLink'})['href'],
                    'team-players': []}
         for player_div in team.find_all("td", {"class": "player-holder"}):
             player = {}
@@ -177,7 +178,7 @@ def _get_historical_lineup(player_anchors):
         player['name'] = buildName[0].rstrip() + buildName[2]
         player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text
         player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text).group())
-        player['url'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("a").get("href")
+        player['url'] = "https://hltv.org" + player_anchor.find("div", {"class": "teammate-info standard-box"}).find("a").get("href")
         players.append(player)
     return players
 
