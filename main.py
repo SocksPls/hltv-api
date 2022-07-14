@@ -7,6 +7,11 @@ import time
 import zoneinfo
 import tzlocal
 
+HLTV_COOKIE_TIMEZONE = "Europe/Copenhagen"
+HLTV_ZONEINFO=zoneinfo.ZoneInfo(HLTV_COOKIE_TIMEZONE)
+LOCAL_TIMEZONE_NAME = tzlocal.get_localzone_name()
+LOCAL_ZONEINFO = zoneinfo.ZoneInfo(LOCAL_TIMEZONE_NAME)
+
 def padIfNeeded(numberStr: str):
     if int(numberStr) < 10:
         return str(numberStr).zfill(2)
@@ -37,9 +42,13 @@ def get_parsed_page(url, delay=0.5):
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
 
+    cookies = {
+        "hltvTimeZone": HLTV_COOKIE_TIMEZONE
+    }
+
     time.sleep(delay)
 
-    return BeautifulSoup(requests.get(url, headers=headers).text, "lxml")
+    return BeautifulSoup(requests.get(url, headers=headers, cookies=cookies).text, "lxml")
 
 
 def top5teams():
@@ -183,11 +192,11 @@ def get_matches():
             matchObj['url'] = "https://hltv.org" + getMatch.find("a", {"class": "match a-reset"}).get("href")
             
             if (date and getMatch.find("div", {"class": "matchTime"})):
-                timeFromHLTV = datetime.datetime.strptime(date + " " + getMatch.find("div", {"class": "matchTime"}).text,'%Y-%m-%d %H:%M').replace(tzinfo=zoneinfo.ZoneInfo('Europe/Copenhagen'))
-                timeFromHLTV = timeFromHLTV.astimezone(zoneinfo.ZoneInfo(tzlocal.get_localzone_name()))
+                timeFromHLTV = datetime.datetime.strptime(date + " " + getMatch.find("div", {"class": "matchTime"}).text,'%Y-%m-%d %H:%M').replace(tzinfo=HLTV_ZONEINFO)
+                timeFromHLTV = timeFromHLTV.astimezone(LOCAL_ZONEINFO)
                 matchObj['date'] = timeFromHLTV.strftime('%Y-%m-%d')
                 matchObj['time'] = timeFromHLTV.strftime('%H:%M')
-                timenow = datetime.datetime.now().astimezone(zoneinfo.ZoneInfo(tzlocal.get_localzone_name())).strftime('%Y-%m-%d %H:%M')
+                timenow = datetime.datetime.now().astimezone(LOCAL_ZONEINFO).strftime('%Y-%m-%d %H:%M')
                 deadline = date + " " + getMatch.find("div", {"class": "matchTime"}).text
                 currentTime = datetime.datetime.strptime(timenow,'%Y-%m-%d %H:%M')
                 ends = datetime.datetime.strptime(deadline, '%Y-%m-%d %H:%M')
@@ -232,8 +241,8 @@ def get_results():
                 dateArr = dateText.split()
 
                 dateTextFromArrPadded = padIfNeeded(dateArr[2]) + "-" + padIfNeeded(monthNameToNumber(dateArr[0])) + "-" + padIfNeeded(dateArr[1])
-                dateFromHLTV = datetime.datetime.strptime(dateTextFromArrPadded,'%Y-%m-%d').replace(tzinfo=zoneinfo.ZoneInfo('Europe/Copenhagen'))
-                dateFromHLTV = dateFromHLTV.astimezone(zoneinfo.ZoneInfo(tzlocal.get_localzone_name()))
+                dateFromHLTV = datetime.datetime.strptime(dateTextFromArrPadded,'%Y-%m-%d').replace(tzinfo=HLTV_ZONEINFO)
+                dateFromHLTV = dateFromHLTV.astimezone(LOCAL_ZONEINFO)
 
                 resultObj['date'] = dateFromHLTV.strftime('%Y-%m-%d')
             else:
@@ -290,7 +299,11 @@ def get_results_by_date(start_date, end_date):
             # TODO: yes, this shouldn't be hardcoded, but I'll be very surprised if this API is still a thing in 21XX
             startingTwoDigitsOfYear = "20"
             dateTextFromArrPadded = startingTwoDigitsOfYear + padIfNeeded(dateArr[2]) + "-" + padIfNeeded(dateArr[1]) + "-" + padIfNeeded(dateArr[0])
-            date = dateTextFromArrPadded
+
+            dateFromHLTV = datetime.datetime.strptime(dateTextFromArrPadded,'%Y-%m-%d').replace(tzinfo=HLTV_ZONEINFO)
+            dateFromHLTV = dateFromHLTV.astimezone(LOCAL_ZONEINFO)
+
+            date = dateFromHLTV.strftime('%Y-%m-%d')
 
             result_dict = {"team1": t1, "team2": t2, "team1score": t1_score,
                            "team2score": t2_score, "date": date, "map": map, "event": event}
