@@ -329,3 +329,10 @@ Provides an API for HLTV
 >>> hltv.get_results_by_date()
 [{'team2score': 16, 'team1': 'AGO', 'team2': 'G2', 'team1score': 8, 'map': 'Inferno', 'date': '2018-2-15', 'event': 'ESL Pro League Season 7 Europe'}, ... ]
 ```
+
+## `get_match_countdown`
+
+```python
+>>> hltv.get_match_countdown('https://www.hltv.org/matches/2357385/vertex-vs-aftershock-esl-challenger-melbourne-2022-oceania-closed-qualifier')
+'2:18:48'
+```
