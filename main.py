@@ -7,7 +7,7 @@ import time
 
 def padIfNeeded(numberStr: str):
     if int(numberStr) < 10:
-        return "0" + str(numberStr)
+        return str(numberStr).zfill(2)
     else:
         return str(numberStr)
 
@@ -76,12 +76,12 @@ def top_players():
     playersArray = []
     for player in players.find_all("div", {"class": "top-x-box standard-box"}):
         playerObj = {}
-        playerObj['country'] = player.find_all('img')[1]['alt']
+        playerObj['country'] = player.find_all('img')[1]['alt'].encode('utf8')
         buildName = player.find('img', {'class': 'img'})['alt'].split("'")
         playerObj['name'] = buildName[0].rstrip() + buildName[2]
-        playerObj['nickname'] = player.find('a', {'class': 'name'}).text
-        playerObj['rating'] = player.find('div', {'class': 'rating'}).find('span', {'class': 'bold'}).text
-        playerObj['maps-played'] = player.find('div', {'class': 'average gtSmartphone-only'}).find('span', {'class': 'bold'}).text
+        playerObj['nickname'] = player.find('a', {'class': 'name'}).text.encode('utf8')
+        playerObj['rating'] = player.find('div', {'class': 'rating'}).find('span', {'class': 'bold'}).text.encode('utf8')
+        playerObj['maps-played'] = player.find('div', {'class': 'average gtSmartphone-only'}).find('span', {'class': 'bold'}).text.encode('utf8')
 
         playersArray.append(playerObj)
     return playersArray
@@ -110,7 +110,7 @@ def get_team_info(teamid):
     page = get_parsed_page("https://www.hltv.org/?pageid=179&teamid=" + str(teamid))
 
     team_info = {}
-    team_info['team-name']=page.find("div", {"class": "context-item"}).text
+    team_info['team-name']=page.find("div", {"class": "context-item"}).text.encode('utf8')
 
     current_lineup = _get_current_lineup(page.find_all("div", {"class": "col teammate"}))
     team_info['current-lineup'] = current_lineup
@@ -125,8 +125,8 @@ def get_team_info(teamid):
         stats = columns.find_all("div", {"class": "col standard-box big-padding"})
 
         for stat in stats:
-            stat_value = stat.find("div", {"class": "large-strong"}).text
-            stat_title = stat.find("div", {"class": "small-label-below"}).text
+            stat_value = stat.find("div", {"class": "large-strong"}).text.encode('utf8')
+            stat_title = stat.find("div", {"class": "small-label-below"}).text.encode('utf8')
             team_stats[stat_title] = stat_value
 
     team_info['stats'] = team_stats
@@ -142,9 +142,9 @@ def _get_current_lineup(player_anchors):
     for player_anchor in player_anchors[0:5]:
         player = {}
         buildName = player_anchor.find("img", {"class": "container-width"})["alt"].split('\'')
-        player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"]
+        player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"].encode('utf8')
         player['name'] = buildName[0].rstrip() + buildName[2]
-        player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text
+        player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text.encode('utf8')
         player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text).group())
         players.append(player)
     return players
@@ -192,13 +192,13 @@ def get_matches():
                     matchObj['countdown'] = str(ends - start)
 
             if getMatch.find("div", {"class": "matchEvent"}):
-                matchObj['event'] = getMatch.find("div", {"class": "matchEvent"}).text.strip()
+                matchObj['event'] = getMatch.find("div", {"class": "matchEvent"}).text.encode('utf8').strip()
             else:
-                matchObj['event'] = getMatch.find("div", {"class": "matchInfoEmpty"}).text.strip()
+                matchObj['event'] = getMatch.find("div", {"class": "matchInfoEmpty"}).text.encode('utf8').strip()
 
             if (getMatch.find_all("div", {"class": "matchTeams"})):
-                matchObj['team1'] = getMatch.find_all("div", {"class": "matchTeam"})[0].text.lstrip().rstrip()
-                matchObj['team2'] = getMatch.find_all("div", {"class": "matchTeam"})[1].text.lstrip().rstrip()
+                matchObj['team1'] = getMatch.find_all("div", {"class": "matchTeam"})[0].text.encode('utf8').lstrip().rstrip()
+                matchObj['team2'] = getMatch.find_all("div", {"class": "matchTeam"})[1].text.encode('utf8').lstrip().rstrip()
             else:
                 matchObj['team1'] = None
                 matchObj['team2'] = None
@@ -227,22 +227,22 @@ def get_results():
                 dateArr = dateText.split()
 
                 dateTextFromArrPadded = padIfNeeded(dateArr[2]) + "-" + padIfNeeded(monthNameToNumber(dateArr[0])) + "-" + padIfNeeded(dateArr[1])
-                resultObj['date'] = dateTextFromArrPadded
+                resultObj['date'] = dateTextFromArrPadded.encode('utf8')
             else:
                 dt = datetime.date.today()
                 resultObj['date'] = str(dt.day) + '/' + str(dt.month) + '/' + str(dt.year)
 
             if (res.find("td", {"class": "placeholder-text-cell"})):
-                resultObj['event'] = res.find("td", {"class": "placeholder-text-cell"}).text
+                resultObj['event'] = res.find("td", {"class": "placeholder-text-cell"}).text.encode('utf8')
             elif (res.find("td", {"class": "event"})):
-                resultObj['event'] = res.find("td", {"class": "event"}).text
+                resultObj['event'] = res.find("td", {"class": "event"}).text.encode('utf8')
             else:
                 resultObj['event'] = None
 
             if (res.find_all("td", {"class": "team-cell"})):
-                resultObj['team1'] = res.find_all("td", {"class": "team-cell"})[0].text.lstrip().rstrip()
+                resultObj['team1'] = res.find_all("td", {"class": "team-cell"})[0].text.encode('utf8').lstrip().rstrip()
                 resultObj['team1score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[0].text.lstrip().rstrip())
-                resultObj['team2'] = res.find_all("td", {"class": "team-cell"})[1].text.lstrip().rstrip()
+                resultObj['team2'] = res.find_all("td", {"class": "team-cell"})[1].text.encode('utf8').lstrip().rstrip()
                 resultObj['team2score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[1].text.lstrip().rstrip())
             else:
                 resultObj['team1'] = None
