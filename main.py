@@ -100,42 +100,6 @@ def get_players(teamid):
 
     return players
 
-def get_player_info(player_id):
-    """
-    :param player_id: integer (or string consisting of integers)
-    :return: dictionary of player
-
-    example player id: 7398 (dupreeh)
-    """
-
-    page = get_parsed_page(f"https://www.hltv.org/stats/players/{player_id}/a")
-    statistics = page.find("div", {"class": "statistics"}).find_all("div", {"class": "stats-row"})
-    player_info = {
-        'nickname': page.find("h1", {"class": "summaryNickname text-ellipsis"}).text,
-        'name': page.find("div", {"class": "text-ellipsis"}).text[1:-1],
-        'country': page.find("img", {"class": "flag"})["alt"],
-        'team': page.find("div", {"class": "SummaryTeamname text-ellipsis"}).text,
-        'age': page.find("div", {"class": "summaryPlayerAge"}).text[:2],
-        'stats': {
-            'total_kills': statistics[0].find_all("span")[1].text,
-            'headshot_percent': statistics[1].find_all("span")[1].text,
-            'total_deaths': statistics[2].find_all("span")[1].text,
-            'kd_ratio': statistics[3].find_all("span")[1].text,
-            'dmg_per_round': statistics[4].find_all("span")[1].text,
-            'grenade_dmg_per_round': statistics[5].find_all("span")[1].text,
-            'maps_played': statistics[6].find_all("span")[1].text,
-            'rounds_played': statistics[7].find_all("span")[1].text,
-            'kills_per_round': statistics[8].find_all("span")[1].text,
-            'assists_per_round': statistics[9].find_all("span")[1].text,
-            'deaths_per_round': statistics[10].find_all("span")[1].text,
-            'saved_by_teammate_per_round': statistics[11].find_all("span")[1].text,
-            'saved_teammates_per_round': statistics[12].find_all("span")[1].text,
-            'rating_1': statistics[13].find_all("span")[1].text,
-        }
-    }
-
-    return player_info
-
 def get_team_info(teamid):
     """
     :param teamid: integer (or string consisting of integers)
@@ -168,47 +132,6 @@ def get_team_info(teamid):
     team_info['stats'] = team_stats
 
     return team_info
-
-
-def get_match_info(match_id):
-    """
-    Will get match data, NOT map data
-    :param match_id: integer (or string consisting of integers)
-    :return dictionary of match
-
-    example match id: 65090 (fnatic-vs-nip)
-    """
-    page = get_parsed_page(f"https://www.hltv.org/stats/matches/{match_id}/a")
-
-    match_info = {
-        "team1": {
-            "name": page.find_all("table", {"class": "stats-table"})[0].find("th", {"class": "st-teamname"}).text
-        },
-        "team2": {
-            "name": page.find_all("table", {"class": "stats-table"})[1].find("th", {"class": "st-teamname"}).text
-        }
-    }
-
-    match_info["team1"]["players"] = [player.text for player in page.find_all("table", {"class": "stats-table"})[0].find_all("td", {"class": "st-player"})]
-    match_info["team2"]["players"] = [player.text for player in page.find_all("table", {"class": "stats-table"})[1].find_all("td", {"class": "st-player"})]
-
-    for team in ["team1", "team2"]:
-        for count, player in enumerate(match_info[team]["players"]):
-            stats_table = page.find_all("table", {"class": "stats-table"})[0]
-            match_info[team][player] = {
-                "kills": stats_table.find_all("td", {"class": "st-kills"})[count].text.split()[0],
-                "headshots": stats_table.find_all("td", {"class": "st-kills"})[count].text.split("(")[-1][:-1],
-                "assists": stats_table.find_all("td", {"class": "st-assists"})[count].text.split()[0],
-                "flash_assists": stats_table.find_all("td", {"class": "st-assists"})[count].text.split("(")[-1][:-1],
-                "deaths": stats_table.find_all("td", {"class": "st-deaths"})[count].text,
-                "kast": stats_table.find_all("td", {"class": "st-kdratio"})[count].text,
-                "kd_diff": stats_table.find_all("td", {"class": "st-kddiff"})[count].text,
-                "adr": stats_table.find_all("td", {"class": "st-adr"})[count].text,
-                "fk_diff": stats_table.find_all("td", {"class": "st-fkdiff"})[count].text,
-                "rating": stats_table.find_all("td", {"class": "st-rating"})[count].text,
-            }
-
-    return match_info
 
 def _get_current_lineup(player_anchors):
     """
