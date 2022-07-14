@@ -53,12 +53,10 @@ def get_parsed_page(url, delay=0.5):
 
 def top5teams():
     home = get_parsed_page("https://hltv.org/")
-    count = 0
     teams = []
     for team in home.find_all("div", {"class": ["col-box rank"], }):
-        count += 1
-        teamname = team.text[3:]
-        teams.append(teamname)
+        team = {'name': team.text[3:], 'url': "https://hltv.org" + team.find_all("a")[1]["href"]}
+        teams.append(team)
     return teams
 
 
@@ -71,11 +69,13 @@ def top30teams():
                    'rank': converters.to_int(team.select('.position')[0].text.strip(), regexp=True),
                    'rank-points': converters.to_int(team.find('span', {'class': 'points'}).text, regexp=True),
                    'team-id': converters.to_int(team.find('a', {'class': 'details moreLink'})['href'].split('/')[-1]),
+                    'url': "https://www.hltv.org" + team.find('a', {'class': 'details moreLink'})['href'],
                    'team-players': []}
         for player_div in team.find_all("td", {"class": "player-holder"}):
             player = {}
             player['name'] = player_div.find('img', {'class': 'playerPicture'})['title']
             player['player-id'] = converters.to_int(player_div.select('.pointer')[0]['href'].split("/")[-2])
+            player['url'] = "https://www.hltv.org" + player_div.select('.pointer')[0]['href']
             newteam['team-players'].append(player)
         teamlist.append(newteam)
     return teamlist
@@ -87,13 +87,13 @@ def top_players():
     playersArray = []
     for player in players.find_all("div", {"class": "top-x-box standard-box"}):
         playerObj = {}
-        playerObj['country'] = player.find_all('img')[1]['alt'].encode('utf8')
+        playerObj['country'] = player.find_all('img')[1]['alt']
         buildName = player.find('img', {'class': 'img'})['alt'].split("'")
         playerObj['name'] = buildName[0].rstrip() + buildName[2]
-        playerObj['nickname'] = player.find('a', {'class': 'name'}).text.encode('utf8')
-        playerObj['rating'] = player.find('div', {'class': 'rating'}).find('span', {'class': 'bold'}).text.encode('utf8')
-        playerObj['maps-played'] = player.find('div', {'class': 'average gtSmartphone-only'}).find('span', {'class': 'bold'}).text.encode('utf8')
-
+        playerObj['nickname'] = player.find('a', {'class': 'name'}).text
+        playerObj['rating'] = player.find('div', {'class': 'rating'}).find('span', {'class': 'bold'}).text
+        playerObj['maps-played'] = player.find('div', {'class': 'average gtSmartphone-only'}).find('span', {'class': 'bold'}).text
+        playerObj['url'] = "https://hltv.org" + player.find('a', {'class': 'name'}).get('href')
         playersArray.append(playerObj)
     return playersArray
 
@@ -106,7 +106,8 @@ def get_players(teamid):
         players.append({
             'id': player_link["href"].split("/")[2],
             'nickname': player_link["title"],
-            'name': player_link.find("img")['title']
+            'name': player_link.find("img")['title'],
+            'url': "https://hltv.org" + player_link["href"]
         })
 
     return players
@@ -121,7 +122,7 @@ def get_team_info(teamid):
     page = get_parsed_page("https://www.hltv.org/?pageid=179&teamid=" + str(teamid))
 
     team_info = {}
-    team_info['team-name']=page.find("div", {"class": "context-item"}).text.encode('utf8')
+    team_info['team-name']=page.find("div", {"class": "context-item"}).text
 
     current_lineup = _get_current_lineup(page.find_all("div", {"class": "col teammate"}))
     team_info['current-lineup'] = current_lineup
@@ -136,11 +137,13 @@ def get_team_info(teamid):
         stats = columns.find_all("div", {"class": "col standard-box big-padding"})
 
         for stat in stats:
-            stat_value = stat.find("div", {"class": "large-strong"}).text.encode('utf8')
-            stat_title = stat.find("div", {"class": "small-label-below"}).text.encode('utf8')
+            stat_value = stat.find("div", {"class": "large-strong"}).text
+            stat_title = stat.find("div", {"class": "small-label-below"}).text
             team_stats[stat_title] = stat_value
 
     team_info['stats'] = team_stats
+
+    team_info['url'] = "https://hltv.org/stats/team/" + str(teamid) + "/" + str(team_info['team-name'])
 
     return team_info
 
@@ -153,10 +156,11 @@ def _get_current_lineup(player_anchors):
     for player_anchor in player_anchors[0:5]:
         player = {}
         buildName = player_anchor.find("img", {"class": "container-width"})["alt"].split('\'')
-        player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"].encode('utf8')
+        player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"]
         player['name'] = buildName[0].rstrip() + buildName[2]
-        player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text.encode('utf8')
+        player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text
         player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text).group())
+        player['url'] = "https://hltv.org" + player_anchor.find("div", {"class": "teammate-info standard-box"}).find("a").get("href")
         players.append(player)
     return players
 
@@ -169,10 +173,11 @@ def _get_historical_lineup(player_anchors):
     for player_anchor in player_anchors[5::]:
         player = {}
         buildName = player_anchor.find("img", {"class": "container-width"})["alt"].split('\'')
-        player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"].encode('utf8')
+        player['country'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("img", {"class": "flag"})["alt"]
         player['name'] = buildName[0].rstrip() + buildName[2]
-        player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text.encode('utf8')
+        player['nickname'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("div", {"class": "text-ellipsis"}).text
         player['maps-played'] = int(re.search(r'\d+', player_anchor.find("div", {"class": "teammate-info standard-box"}).find("span").text).group())
+        player['url'] = player_anchor.find("div", {"class": "teammate-info standard-box"}).find("a").get("href")
         players.append(player)
     return players
 
@@ -205,13 +210,13 @@ def get_matches():
                     matchObj['countdown'] = str(ends - currentTime)
 
             if getMatch.find("div", {"class": "matchEvent"}):
-                matchObj['event'] = getMatch.find("div", {"class": "matchEvent"}).text.encode('utf8').strip()
+                matchObj['event'] = getMatch.find("div", {"class": "matchEvent"}).text.strip()
             else:
-                matchObj['event'] = getMatch.find("div", {"class": "matchInfoEmpty"}).text.encode('utf8').strip()
+                matchObj['event'] = getMatch.find("div", {"class": "matchInfoEmpty"}).text.strip()
 
             if (getMatch.find_all("div", {"class": "matchTeams"})):
-                matchObj['team1'] = getMatch.find_all("div", {"class": "matchTeam"})[0].text.encode('utf8').lstrip().rstrip()
-                matchObj['team2'] = getMatch.find_all("div", {"class": "matchTeam"})[1].text.encode('utf8').lstrip().rstrip()
+                matchObj['team1'] = getMatch.find_all("div", {"class": "matchTeam"})[0].text.lstrip().rstrip()
+                matchObj['team2'] = getMatch.find_all("div", {"class": "matchTeam"})[1].text.lstrip().rstrip()
             else:
                 matchObj['team1'] = None
                 matchObj['team2'] = None
@@ -250,17 +255,17 @@ def get_results():
                 resultObj['date'] = str(dt.day) + '/' + str(dt.month) + '/' + str(dt.year)
 
             if (res.find("td", {"class": "placeholder-text-cell"})):
-                resultObj['event'] = res.find("td", {"class": "placeholder-text-cell"}).text.encode('utf8')
+                resultObj['event'] = res.find("td", {"class": "placeholder-text-cell"}).text
             elif (res.find("td", {"class": "event"})):
-                resultObj['event'] = res.find("td", {"class": "event"}).text.encode('utf8')
+                resultObj['event'] = res.find("td", {"class": "event"}).text
             else:
                 resultObj['event'] = None
 
             if (res.find_all("td", {"class": "team-cell"})):
-                resultObj['team1'] = res.find_all("td", {"class": "team-cell"})[0].text.encode('utf8').lstrip().rstrip()
-                resultObj['team1score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[0].text.encode('utf8').lstrip().rstrip())
-                resultObj['team2'] = res.find_all("td", {"class": "team-cell"})[1].text.encode('utf8').lstrip().rstrip()
-                resultObj['team2score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[1].text.encode('utf8').lstrip().rstrip())
+                resultObj['team1'] = res.find_all("td", {"class": "team-cell"})[0].text.lstrip().rstrip()
+                resultObj['team1score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[0].text.lstrip().rstrip())
+                resultObj['team2'] = res.find_all("td", {"class": "team-cell"})[1].text.lstrip().rstrip()
+                resultObj['team2score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[1].text.lstrip().rstrip())
             else:
                 resultObj['team1'] = None
                 resultObj['team2'] = None
