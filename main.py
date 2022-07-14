@@ -338,6 +338,7 @@ def get_results_by_date(start_date, end_date):
 def get_match_countdown(matchpage):
     match = get_parsed_page(matchpage)
     match_countdown = match.find("div", {"class": "countdown"}).text
+    match_countdown = re.sub("[dhms ]","",match_countdown)
     
     return match_countdown
 
