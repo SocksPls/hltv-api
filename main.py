@@ -295,6 +295,7 @@ def get_results_by_date(start_date, end_date):
             map = result.find(attrs={"class": "statsDetail"}).find(attrs={"class": "dynamic-map-name-full"}).text
             event = result.find(attrs={"class": "event-col"}).text
             dateText = result.find(attrs={"class": "date-col"}).find("a").find("div").text
+            url = "https://hltv.org" + result.find(attrs={"class": "date-col"}).find("a").get("href")
             dateArr = dateText.split("/")
             # TODO: yes, this shouldn't be hardcoded, but I'll be very surprised if this API is still a thing in 21XX
             startingTwoDigitsOfYear = "20"
@@ -306,7 +307,7 @@ def get_results_by_date(start_date, end_date):
             date = dateFromHLTV.strftime('%Y-%m-%d')
 
             result_dict = {"team1": t1, "team2": t2, "team1score": t1_score,
-                           "team2score": t2_score, "date": date, "map": map, "event": event}
+                           "team2score": t2_score, "date": date, "map": map, "event": event, "url": url}
 
             # Add this pages results to the result list
             results_list.append(result_dict)
