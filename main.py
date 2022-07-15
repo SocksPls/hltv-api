@@ -201,7 +201,18 @@ def _get_historical_lineup(player_anchors):
         players.append(player)
     return players
 
+def _generate_countdown(date: str, time: str):
+    timenow = datetime.datetime.now().astimezone(LOCAL_ZONEINFO).strftime('%Y-%m-%d %H:%M')
+    deadline = date + " " + time
+    currentTime = datetime.datetime.strptime(timenow,'%Y-%m-%d %H:%M')
+    ends = datetime.datetime.strptime(deadline, '%Y-%m-%d %H:%M')
+    if currentTime < ends:
+        return str(ends - currentTime)
+    return None
+
+MATCH_WITH_COUNTDOWN = None
 def get_matches():
+    global MATCH_WITH_COUNTDOWN
     matches = get_parsed_page("https://www.hltv.org/matches/")
     matches_list = []
 
@@ -221,13 +232,11 @@ def get_matches():
                 timeFromHLTV = timeFromHLTV.astimezone(LOCAL_ZONEINFO)
                 matchObj['date'] = timeFromHLTV.strftime('%Y-%m-%d')
                 matchObj['time'] = timeFromHLTV.strftime('%H:%M')
-                timenow = datetime.datetime.now().astimezone(LOCAL_ZONEINFO).strftime('%Y-%m-%d %H:%M')
-                deadline = date + " " + getMatch.find("div", {"class": "matchTime"}).text
-                currentTime = datetime.datetime.strptime(timenow,'%Y-%m-%d %H:%M')
-                ends = datetime.datetime.strptime(deadline, '%Y-%m-%d %H:%M')
 
-                if currentTime < ends:
-                    matchObj['countdown'] = str(ends - currentTime)
+                matchObj['countdown'] = _generate_countdown(date, getMatch.find("div", {"class": "matchTime"}).text)
+
+                if not MATCH_WITH_COUNTDOWN and matchObj['countdown']:
+                    MATCH_WITH_COUNTDOWN = converters.to_int(getMatch.find("a", {"class": "match a-reset"}).get("href").split("/")[-2])
 
             if getMatch.find("div", {"class": "matchEvent"}):
                 matchObj['event'] = getMatch.find("div", {"class": "matchEvent"}).text.strip()
@@ -360,6 +369,22 @@ def get_results_by_date(start_date, end_date):
 
     return results_list
 
+def get_match_countdown(match_id):
+    url = "https://www.hltv.org/matches/" + str(match_id) + "/page"
+    match_page = get_parsed_page(url)
+    timeAndEvent = match_page.find("div", {"class": "timeAndEvent"})
+    date = timeAndEvent.find("div", {"class": "date"}).text
+    time = timeAndEvent.find("div", {"class": "time"}).text
+    dateArr = date.replace("th of","").split()
+    dateTextFromArrPadded = _padIfNeeded(dateArr[2]) + "-" + _padIfNeeded(_monthNameToNumber(dateArr[1])) + "-" + _padIfNeeded(dateArr[0])
+
+    dateFromHLTV = datetime.datetime.strptime(dateTextFromArrPadded,'%Y-%m-%d').replace(tzinfo=HLTV_ZONEINFO)
+    dateFromHLTV = dateFromHLTV.astimezone(LOCAL_ZONEINFO)
+
+    date = dateFromHLTV.strftime('%Y-%m-%d')
+
+    return _generate_countdown(date, time)
+
 if __name__ == "__main__":
     import pprint
     pp = pprint.PrettyPrinter()
@@ -388,3 +413,6 @@ if __name__ == "__main__":
     pp.pprint('get_results_by_date')
     today_iso = datetime.datetime.today().isoformat().split('T')[0]
     pp.pprint(get_results_by_date(today_iso, today_iso))
+
+    pp.pprint('get_match_countdown')
+    pp.pprint(get_match_countdown(MATCH_WITH_COUNTDOWN))

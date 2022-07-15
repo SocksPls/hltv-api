@@ -293,3 +293,10 @@ Provides an API for HLTV
   ...
 ]
 ```
+
+## `get_match_countdown`
+
+```python
+>>> hltv.get_match_countdown(2357395)
+'1:29:00'
+```
