@@ -276,10 +276,10 @@ def get_results():
             resultObj['match-id'] = converters.to_int(res.find("a", {"class": "a-reset"}).get("href").split("/")[-2])
 
             if (res.parent.find("span", {"class": "standard-headline"})):
-                dateText = res.parent.find("span", {"class": "standard-headline"}).text.replace("Results for ", "").replace("th", "")
+                dateText = res.parent.find("span", {"class": "standard-headline"}).text.replace("Results for ", "").replace("th", "").replace("rd","").replace("st","").replace("nd","")
 
                 dateArr = dateText.split()
-
+                
                 dateTextFromArrPadded = _padIfNeeded(dateArr[2]) + "-" + _padIfNeeded(_monthNameToNumber(dateArr[0])) + "-" + _padIfNeeded(dateArr[1])
                 dateFromHLTV = datetime.datetime.strptime(dateTextFromArrPadded,'%Y-%m-%d').replace(tzinfo=HLTV_ZONEINFO)
                 dateFromHLTV = dateFromHLTV.astimezone(LOCAL_ZONEINFO)
