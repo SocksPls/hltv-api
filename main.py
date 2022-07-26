@@ -375,7 +375,7 @@ def get_match_countdown(match_id):
     timeAndEvent = match_page.find("div", {"class": "timeAndEvent"})
     date = timeAndEvent.find("div", {"class": "date"}).text
     time = timeAndEvent.find("div", {"class": "time"}).text
-    dateArr = date.replace("th of","").split()
+    dateArr = date.replace("th of","").replace("rd of","").replace("st of","").replace("nd of","").split()
     dateTextFromArrPadded = _padIfNeeded(dateArr[2]) + "-" + _padIfNeeded(_monthNameToNumber(dateArr[1])) + "-" + _padIfNeeded(dateArr[0])
 
     dateFromHLTV = datetime.datetime.strptime(dateTextFromArrPadded,'%Y-%m-%d').replace(tzinfo=HLTV_ZONEINFO)
