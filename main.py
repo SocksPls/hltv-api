@@ -142,6 +142,17 @@ def get_team_info(teamid):
     
     team_info['team-id'] = _findTeamId(page.find("div", {"class": "context-item"}).text)
 
+    match_page = get_parsed_page("https://www.hltv.org/team/" + str(teamid) +
+                                 "/" + str(team_info['team-name']) + "#tab-matchesBox")
+    has_not_upcomming_matches = match_page.find(
+        "div", {"class": "empty-state"})
+    if has_not_upcomming_matches:
+        team_info['matches'] = []
+    else:
+        match_table = match_page.find(
+            "table", {"class": "table-container match-table"})
+        team_info['matches'] = _get_matches_by_team(match_table)
+
     current_lineup = _get_current_lineup(page.find_all("div", {"class": "col teammate"}))
     team_info['current-lineup'] = current_lineup
 
@@ -314,6 +325,41 @@ def get_results():
             results_list.append(resultObj)
 
     return results_list
+
+def _get_matches_by_team(table):
+    events = table.find_all("tr", {"class": "event-header-cell"})
+    event_matches = table.find_all("tbody")
+    matches = []
+    for i, event in enumerate(events):
+
+        event_name = event.find("a", {"class":  "a-reset"}).text
+        rows = event_matches[i]("tr", {"class": "team-row"})
+
+        for row in rows[0:len(rows)]:
+            match = {}
+            match['date'] = row.find(
+                "td", {"class":  "date-cell"}).find("span").text
+            match['teams'] = {}
+            match['teams']["team_1"] = row.find(
+                "td", {"class":  "team-center-cell"}).find("a", {"class": "team-name team-1"}).text
+            match['teams']["team_1_id"] = row.find(
+                "td", {"class":  "team-center-cell"}).find("a", {"class": "team-name team-1"})['href'].split('/')[2]
+            match['teams']["team_2"] = row.find(
+                "td", {"class":  "team-center-cell"}).find("a", {"class": "team-name team-2"}).text
+            match['teams']["team_2_id"] = row.find(
+                "td", {"class":  "team-center-cell"}).find("a", {"class": "team-name team-2"})['href'].split('/')[2]
+            match["confront_name"] = match['teams']["team_1"] + \
+                " X " + match['teams']["team_2"]
+            match["championship"] = event_name
+            match_url = row.find(
+                "td", {"class": "matchpage-button-cell"}).find("a")['href']
+            match['time'] = get_parsed_page("https://www.hltv.org" + match_url).find(
+                'div', {"class": "timeAndEvent"}).find('div', {"class": "time"}).text
+            match['full_time'] = match['date'] + ' at ' + match['time']
+            matches.append(match)
+
+    return matches
+
 
 def get_results_by_date(start_date, end_date):
     # Dates like yyyy-mm-dd  (iso)
