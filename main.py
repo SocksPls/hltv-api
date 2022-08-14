@@ -332,22 +332,22 @@ def _get_matches_by_team(table):
     matches = []
     for i, event in enumerate(events):
 
-        event_name = event.find("a", {"class":  "a-reset"}).text
+        event_name = event.find("a", {"class": "a-reset"}).text
         rows = event_matches[i]("tr", {"class": "team-row"})
 
         for row in rows[0:len(rows)]:
             match = {}
             match['date'] = row.find(
-                "td", {"class":  "date-cell"}).find("span").text
+                "td", {"class": "date-cell"}).find("span").text
             match['teams'] = {}
             match['teams']["team_1"] = row.find(
-                "td", {"class":  "team-center-cell"}).find("a", {"class": "team-name team-1"}).text
+                "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-1"}).text
             match['teams']["team_1_id"] = row.find(
-                "td", {"class":  "team-center-cell"}).find("a", {"class": "team-name team-1"})['href'].split('/')[2]
+                "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-1"})['href'].split('/')[2]
             match['teams']["team_2"] = row.find(
-                "td", {"class":  "team-center-cell"}).find("a", {"class": "team-name team-2"}).text
+                "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-2"}).text
             match['teams']["team_2_id"] = row.find(
-                "td", {"class":  "team-center-cell"}).find("a", {"class": "team-name team-2"})['href'].split('/')[2]
+                "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-2"})['href'].split('/')[2]
             match["confront_name"] = match['teams']["team_1"] + \
                 " X " + match['teams']["team_2"]
             match["championship"] = event_name
