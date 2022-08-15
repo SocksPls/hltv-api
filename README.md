@@ -9,7 +9,8 @@ Provides an API for HLTV
 >>> hltv.top5teams()
 [{'id': 4608,
   'name': 'Natus Vincere',
-  'url': 'https://hltv.org/team/4608/natus-vincere'},...]
+  'url': 'https://hltv.org/team/4608/natus-vincere'},
+  ...]
 ```
 
 ## `top30teams`  
@@ -23,7 +24,8 @@ Provides an API for HLTV
   'team-id': 4608,
   'team-players': [{'name': "Aleksandr 's1mple' Kostyliev",
                     'player-id': 7998,
-                    'url': 'https://www.hltv.org/player/7998/s1mple'},...],
+                    'url': 'https://www.hltv.org/player/7998/s1mple'},
+                    ...],
   'team-url': 'https://hltv.org/team/4608/Natus Vincere'},
   ...
 ]
@@ -51,7 +53,8 @@ Provides an API for HLTV
 [{'id': 4954,
   'name': "Andreas 'Xyp9x' Højsleth",
   'nickname': 'Xyp9x',
-  'url': 'https://hltv.org/player/4954/xyp9x'},...]
+  'url': 'https://hltv.org/player/4954/xyp9x'},
+  ...]
 ```
 
 ## `get_team_info`  
@@ -63,13 +66,15 @@ Provides an API for HLTV
                      'maps-played': 1239,
                      'name': 'Andreas Højsleth',
                      'nickname': 'Xyp9x',
-                     'url': 'https://hltv.org/stats/players/4954/xyp9x'},...],
+                     'url': 'https://hltv.org/stats/players/4954/xyp9x'},
+                     ...],
  'historical-players': [{'country': 'Denmark',
                          'id': 9612,
                          'maps-played': 86,
                          'name': 'Lucas Andersen',
                          'nickname': 'Bubzkji',
-                         'url': 'https://hltv.org/stats/players/9612/bubzkji'},...],
+                         'url': 'https://hltv.org/stats/players/9612/bubzkji'},
+                         ...],
  'matches': [{'championship': 'BLAST Premier Fall Groups 2022',
               'confront_name': 'Astralis X Ninjas in Pyjamas',
               'date': '2022-08-19',
@@ -77,7 +82,8 @@ Provides an API for HLTV
                         'team_1_id': 6665,
                         'team_2': 'Ninjas in Pyjamas',
                         'team_2_id': 4411},
-              'time': '14:00'},...]
+              'time': '14:00'},
+              ...]
  'stats': {'K/D Ratio': '1.10',
            'Maps played': '1323',
            'Rounds played': '34752',
