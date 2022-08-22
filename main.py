@@ -349,17 +349,32 @@ def _get_matches_by_team(table):
             date = dateFromHLTV.strftime('%Y-%m-%d')
             match['date'] = date
             match['teams'] = {}
-            match['teams']["team_1"] = row.find(
-                "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-1"}).text
-            match['teams']["team_1_id"] = _findTeamId(row.find( "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-1"}).text)
-            match['teams']["team_2"] = row.find(
-                "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-2"}).text
-            match['teams']["team_2_id"] = _findTeamId(row.find( "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-2"}).text)
-            match["confront_name"] = match['teams']["team_1"] + \
-                " X " + match['teams']["team_2"]
+
+            if (row.find(
+                "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-1"})):
+                match['teams']["team_1"] = row.find(
+                    "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-1"}).text
+                match['teams']["team_1_id"] = _findTeamId(row.find( "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-1"}).text)
+            else:
+                match['teams']["team_1"] = None
+                match['teams']["team_1_id"] = None
+
+            if (row.find(
+                "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-2"})):
+                match['teams']["team_2"] = row.find(
+                    "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-2"}).text
+                match['teams']["team_2_id"] = _findTeamId(row.find( "td", {"class": "team-center-cell"}).find("a", {"class": "team-name team-2"}).text)
+            else:
+                match['teams']["team_2"] = None
+                match['teams']["team_2_id"] = None
+
+            match["confront_name"] = match['teams']["team_1"] or "TBD" + \
+                " X " + match['teams']["team_2"] or "TBD"
             match["championship"] = event_name
             match_url = row.find(
                 "td", {"class": "matchpage-button-cell"}).find("a")['href']
+            match['match_id'] = converters.to_int(match_url.split("/")[-2])
+            match['url'] = "https://www.hltv.org" + match_url
             match['time'] = get_parsed_page("https://www.hltv.org" + match_url).find(
                 'div', {"class": "timeAndEvent"}).find('div', {"class": "time"}).text
             matches.append(match)
@@ -396,7 +411,7 @@ def get_results_by_date(start_date, end_date):
             event = result.find(attrs={"class": "event-col"}).text
             dateText = result.find(attrs={"class": "date-col"}).find("a").find("div").text
             url = "https://hltv.org" + result.find(attrs={"class": "date-col"}).find("a").get("href")
-            match_id = converters.to_int(result.find(attrs={"class": "date-col"}).find("a").get("href").split("/")[-2])
+            match_id = converters.to_int(url.split("/")[-2])
             dateArr = dateText.split("/")
             # TODO: yes, this shouldn't be hardcoded, but I'll be very surprised if this API is still a thing in 21XX
             startingTwoDigitsOfYear = "20"

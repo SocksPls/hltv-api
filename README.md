@@ -82,7 +82,9 @@ Provides an API for HLTV
                         'team_1_id': 6665,
                         'team_2': 'Ninjas in Pyjamas',
                         'team_2_id': 4411},
-              'time': '14:00'},
+              'time': '14:00',
+              'match_id': 2357643,
+              'url': 'https://hltv.org/matches/2357643/astralis-vs-ninjas-in-pyjamas-blast-premier-fall-groups-2022'},
               ...]
  'stats': {'K/D Ratio': '1.10',
            'Maps played': '1323',
