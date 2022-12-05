@@ -34,22 +34,12 @@ def _padIfNeeded(numberStr: str):
         return str(numberStr)
 
 def _monthNameToNumber(monthName: str):
-    months = {
-        'January': 1,
-        'February': 2,
-        'March': 3,
-        'April': 4,
-        'May': 5,
-        'June': 6,
-        'July': 7,
-        'August': 8,
-        'Augu': 8,
-        'September': 9,
-        'October': 10,
-        'November': 11,
-        'December': 12
-    }
-    return months[monthName]
+    # Check for the input "Augu" and convert it to "August"
+    # This is necessary because the input string may have been sanitized
+    # by removing the "st" from the day numbers, such as "21st" -> "21"
+    if monthName == "Augu":
+        monthName = "August"
+    return datetime.strptime(monthName, '%B').month
 
 def get_parsed_page(url, delay=0.5):
     # This fixes a blocked by cloudflare error i've encountered
