@@ -39,7 +39,7 @@ def _monthNameToNumber(monthName: str):
     # by removing the "st" from the day numbers, such as "21st" -> "21"
     if monthName == "Augu":
         monthName = "August"
-    return datetime.strptime(monthName, '%B').month
+    return datetime.datetime.strptime(monthName, '%B').month
 
 def get_parsed_page(url, delay=0.5):
     # This fixes a blocked by cloudflare error i've encountered
