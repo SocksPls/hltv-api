@@ -222,7 +222,7 @@ def get_matches():
 
     for match in matchdays:
         matchDetails = match.find_all("div", {"class": "upcomingMatch"})
-        date = match.find({'span': {'class': 'matchDayHeadline'}}).text.split()[-1]
+        date = match.find({'div': {'class': 'matchDayHeadline'}}).text.split()[-1]
         for getMatch in matchDetails:
             matchObj = {}
 
