@@ -12,12 +12,17 @@ HLTV_ZONEINFO=zoneinfo.ZoneInfo(HLTV_COOKIE_TIMEZONE)
 LOCAL_TIMEZONE_NAME = tzlocal.get_localzone_name()
 LOCAL_ZONEINFO = zoneinfo.ZoneInfo(LOCAL_TIMEZONE_NAME)
 
+YEAR = datetime.datetime.now().year
+START_DATE = str(YEAR) + "-01-01"
+END_DATE = str(YEAR) + "-12-31"
+
 TEAM_MAP_FOR_RESULTS = []
 def _get_all_teams():
     if not TEAM_MAP_FOR_RESULTS:
-        teams = get_parsed_page("https://www.hltv.org/stats/teams?minMapCount=0")
+        teams = get_parsed_page(f"https://www.hltv.org/stats/teams?startDate={START_DATE}&endDate={END_DATE}&minMapCount=1")
+        print(teams.find_all("td", {"class": ["teamCol-teams-overview"], }))
         for team in teams.find_all("td", {"class": ["teamCol-teams-overview"], }):
-            team = {'id': converters.to_int(team.find("a")["href"].split("/")[-2]), 'name': team.find("a").text, 'url': "https://hltv.org" + team.find("a")["href"]}
+            team = {'flag': team.find("img")["alt"], 'id': converters.to_int(team.find("a")["href"].split("/")[-2]), 'name': team.find("a").text, 'url': "https://hltv.org" + team.find("a")["href"]}
             TEAM_MAP_FOR_RESULTS.append(team)
 
 def _findTeamId(teamName: str):
@@ -27,6 +32,13 @@ def _findTeamId(teamName: str):
             return team['id']
     return None
 
+def _findTeamFlag(teamName: str):
+    _get_all_teams()
+    for team in TEAM_MAP_FOR_RESULTS:
+        if team['name'] == teamName:
+            return team['flag']
+    return None
+
 def _padIfNeeded(numberStr: str):
     if int(numberStr) < 10:
         return str(numberStr).zfill(2)
@@ -34,27 +46,46 @@ def _padIfNeeded(numberStr: str):
         return str(numberStr)
 
 def _monthNameToNumber(monthName: str):
-    # Check for the input "Augu" and convert it to "August"
-    # This is necessary because the input string may have been sanitized
-    # by removing the "st" from the day numbers, such as "21st" -> "21"
-    if monthName == "Augu":
-        monthName = "August"
-    return datetime.datetime.strptime(monthName, '%B').month
-
-def get_parsed_page(url, delay=0.5):
-    # This fixes a blocked by cloudflare error i've encountered
-    headers = {
-        "referer": "https://www.hltv.org/stats",
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    months = {
+        'January': 1,
+        'February': 2,
+        'March': 3,
+        'April': 4,
+        'May': 5,
+        'June': 6,
+        'July': 7,
+        'August': 8,
+        'Augu': 8,
+        'September': 9,
+        'October': 10,
+        'November': 11,
+        'December': 12
     }
+    return months[monthName]
 
-    cookies = {
-        "hltvTimeZone": HLTV_COOKIE_TIMEZONE
-    }
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from bs4 import BeautifulSoup
+import time
+
+def get_parsed_page(url, delay=3):
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920x1080")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+
+    driver = webdriver.Chrome(options=options)
+    
+    driver.get(url)
 
     time.sleep(delay)
 
-    return BeautifulSoup(requests.get(url, headers=headers, cookies=cookies).text, "lxml")
+    page_source = driver.page_source
+
+    driver.quit()
+
+    return BeautifulSoup(page_source, "html.parser")
 
 def top5teams():
     home = get_parsed_page("https://hltv.org/")
@@ -222,7 +253,7 @@ def get_matches():
 
     for match in matchdays:
         matchDetails = match.find_all("div", {"class": "upcomingMatch"})
-        date = match.find({'div': {'class': 'matchDayHeadline'}}).text.split()[-1]
+        date = match.find({'span': {'class': 'matchDayHeadline'}}).text.split()[-1]
         for getMatch in matchDetails:
             matchObj = {}
 
@@ -302,16 +333,20 @@ def get_results():
                 resultObj['team1'] = res.find_all("td", {"class": "team-cell"})[0].text.lstrip().rstrip()
                 resultObj['team1score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[0].text.lstrip().rstrip())
                 resultObj['team1-id'] = _findTeamId(res.find_all("td", {"class": "team-cell"})[0].text.lstrip().rstrip())
+                resultObj['team1-flag'] = _findTeamFlag(res.find_all("td", {"class": "team-cell"})[0].text.lstrip().rstrip())
                 resultObj['team2'] = res.find_all("td", {"class": "team-cell"})[1].text.lstrip().rstrip()
                 resultObj['team2-id'] = _findTeamId(res.find_all("td", {"class": "team-cell"})[1].text.lstrip().rstrip())
                 resultObj['team2score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[1].text.lstrip().rstrip())
+                resultObj['team2-flag'] = _findTeamFlag(res.find_all("td", {"class": "team-cell"})[1].text.lstrip().rstrip())
             else:
                 resultObj['team1'] = None
                 resultObj['team1-id'] = None
                 resultObj['team1score'] = None
+                resultObj['team1-flag'] = None
                 resultObj['team2'] = None
                 resultObj['team2-id'] = None
                 resultObj['team2score'] = None
+                resultObj['team2-flag'] = None
 
             results_list.append(resultObj)
 
