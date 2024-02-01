@@ -1,6 +1,9 @@
 # hltv-api
 Provides an API for HLTV
 
+## Cloudflare Errors?
+
+[please](https://github.com/SocksPls/hltv-api/issues/40) [no](https://github.com/SocksPls/hltv-api/issues/44) [more](https://github.com/SocksPls/hltv-api/issues/45) [issues](https://github.com/SocksPls/hltv-api/pull/47)
 
 ## `top5teams`  
 
