@@ -6,6 +6,7 @@ from python_utils import converters
 import time
 import zoneinfo
 import tzlocal
+import random
 
 HLTV_COOKIE_TIMEZONE = "Europe/Copenhagen"
 HLTV_ZONEINFO=zoneinfo.ZoneInfo(HLTV_COOKIE_TIMEZONE)
@@ -55,6 +56,31 @@ def get_parsed_page(url, delay=0.5):
     time.sleep(delay)
 
     return BeautifulSoup(requests.get(url, headers=headers, cookies=cookies).text, "lxml")
+
+def get_parsed_page_matches(url, delay=0.5, max_trys = 100):
+    # This fixes a blocked error when trying to get game results page
+    headers = {
+        "referer": "https://www.hltv.org/matches", ## Have changed referer
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    }
+
+    cookies = {
+        "hltvTimeZone": HLTV_COOKIE_TIMEZONE
+    }
+
+    time.sleep(delay)
+    req = requests.get(url, headers=headers, cookies=cookies)
+
+    try_number = 1
+    while req.status_code == 403:
+        time.sleep(delay)
+        req = requests.get(url, headers=headers, cookies=cookies)
+        try_number += 1
+        if try_number == max_trys:
+            break
+        
+    results = BeautifulSoup(req.text, "lxml")
+    return results
 
 def top5teams():
     home = get_parsed_page("https://hltv.org/")
@@ -441,6 +467,103 @@ def get_match_countdown(match_id):
     date = dateFromHLTV.strftime('%Y-%m-%d')
 
     return _generate_countdown(date, time)
+
+def get_results_by_event(event_id):
+
+    ## event id given as integer
+
+    results = get_parsed_page("https://www.hltv.org/results?event=" + str(event_id))
+
+    results_list = []
+
+    pastresults = results.find_all("div", {"class": "results-holder"})
+
+    for result in pastresults:
+        resultDiv = result.find_all("div", {"class": "result-con"})
+
+        for res in resultDiv:
+            resultObj = {}
+
+            resultObj['url'] = "https://hltv.org" + res.find("a", {"class": "a-reset"}).get("href")
+            
+            resultObj['match-id'] = converters.to_int(res.find("a", {"class": "a-reset"}).get("href").split("/")[-2])
+
+            if (res.parent.find("span", {"class": "standard-headline"})):
+                dateText = res.parent.find("span", {"class": "standard-headline"}).text.replace("Results for ", "").replace("th", "").replace("rd","").replace("st","").replace("nd","")
+
+                dateArr = dateText.split()
+                
+                dateTextFromArrPadded = _padIfNeeded(dateArr[2]) + "-" + _padIfNeeded(_monthNameToNumber(dateArr[0])) + "-" + _padIfNeeded(dateArr[1])
+                dateFromHLTV = datetime.datetime.strptime(dateTextFromArrPadded,'%Y-%m-%d').replace(tzinfo=HLTV_ZONEINFO)
+                dateFromHLTV = dateFromHLTV.astimezone(LOCAL_ZONEINFO)
+
+                resultObj['date'] = dateFromHLTV.strftime('%Y-%m-%d')
+            else:
+                dt = datetime.date.today()
+                resultObj['date'] = str(dt.day) + '/' + str(dt.month) + '/' + str(dt.year)
+
+            if (res.find("td", {"class": "placeholder-text-cell"})):
+                resultObj['event'] = res.find("td", {"class": "placeholder-text-cell"}).text
+            elif (res.find("td", {"class": "event"})):
+                resultObj['event'] = res.find("td", {"class": "event"}).text
+            else:
+                resultObj['event'] = None
+
+            if (res.find_all("td", {"class": "team-cell"})):
+                resultObj['team1'] = res.find_all("td", {"class": "team-cell"})[0].text.lstrip().rstrip()
+                resultObj['team1score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[0].text.lstrip().rstrip())
+                resultObj['team1-id'] = _findTeamId(res.find_all("td", {"class": "team-cell"})[0].text.lstrip().rstrip())
+                resultObj['team2'] = res.find_all("td", {"class": "team-cell"})[1].text.lstrip().rstrip()
+                resultObj['team2-id'] = _findTeamId(res.find_all("td", {"class": "team-cell"})[1].text.lstrip().rstrip())
+                resultObj['team2score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[1].text.lstrip().rstrip())
+            else:
+                resultObj['team1'] = None
+                resultObj['team1-id'] = None
+                resultObj['team1score'] = None
+                resultObj['team2'] = None
+                resultObj['team2-id'] = None
+                resultObj['team2score'] = None
+
+            results_list.append(resultObj)
+
+    return results_list
+
+def get_event_team_rankings(event_id):
+
+    url = 'https://www.hltv.org/events/'+ str(event_id) +'/page'
+
+    results = get_parsed_page_matches(url)
+    ranking = [r.text.strip('#') for r in results.find_all('div', attrs={'class': 'event-world-rank'})]
+    teams = [r.text for r in results.find_all('div', attrs={'class': 'text'})]
+
+    team_id_map = {}
+    for i, team in enumerate(teams):
+        if i< len(ranking): ## Sometimes teams do not have ranking (displayed last)
+            team_id_map[team] = ranking[i]
+        else:
+            team_id_map[team] = None
+
+    return team_id_map
+
+def get_match_stats(match_id):
+
+    match_stats = {}
+
+    url = 'https://www.hltv.org/matches/' + str(match_id) + '/page'
+
+    results = get_parsed_page_matches(url)
+
+    match_stats['match-id'] = match_id
+    match_stats['match_type'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[2]
+
+    player_stats = results.find_all('tr', attrs={'class': ''})
+    for i, player in enumerate(player_stats[0:10]):
+        
+        match_stats[f'player{i}_id'] = player.find('a', attrs = {'class': 'flagAlign no-maps-indicator-offset'}).get('href').split('/')[2]
+        match_stats[f'player{i}_rating'] = player.find('td', attrs = {'class': "rating text-center"}).text
+    return match_stats
+
+
 
 if __name__ == "__main__":
     import pprint
