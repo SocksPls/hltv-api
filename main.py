@@ -6,7 +6,6 @@ from python_utils import converters
 import time
 import zoneinfo
 import tzlocal
-import random
 
 HLTV_COOKIE_TIMEZONE = "Europe/Copenhagen"
 HLTV_ZONEINFO=zoneinfo.ZoneInfo(HLTV_COOKIE_TIMEZONE)
