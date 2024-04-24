@@ -41,7 +41,7 @@ def _monthNameToNumber(monthName: str):
         monthName = "August"
     return datetime.datetime.strptime(monthName, '%B').month
 
-def get_parsed_page(url, delay=0.5):
+def get_parsed_page(url, delay=0.5, max_trys = 100):
     # This fixes a blocked by cloudflare error i've encountered
     headers = {
         "referer": "https://www.hltv.org/stats",
@@ -53,8 +53,18 @@ def get_parsed_page(url, delay=0.5):
     }
 
     time.sleep(delay)
+    req = requests.get(url, headers=headers, cookies=cookies)
 
-    return BeautifulSoup(requests.get(url, headers=headers, cookies=cookies).text, "lxml")
+    try_number = 1
+    while req.status_code == 403: ## 'blocked' error code
+        time.sleep(delay)
+        req = requests.get(url, headers=headers, cookies=cookies)
+        try_number += 1
+        if try_number == max_trys:
+            break
+        
+    results = BeautifulSoup(req.text, "lxml")
+    return results
 
 def get_parsed_page_matches(url, delay=0.5, max_trys = 100):
     # This fixes a blocked error when trying to get game results page
@@ -71,7 +81,7 @@ def get_parsed_page_matches(url, delay=0.5, max_trys = 100):
     req = requests.get(url, headers=headers, cookies=cookies)
 
     try_number = 1
-    while req.status_code == 403:
+    while req.status_code == 403: ##'blocked' error code
         time.sleep(delay)
         req = requests.get(url, headers=headers, cookies=cookies)
         try_number += 1
@@ -553,13 +563,16 @@ def get_match_stats(match_id):
     results = get_parsed_page_matches(url)
 
     match_stats['match-id'] = match_id
-    match_stats['match_type'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[2]
+    match_stats['match_type'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[0]
+    match_stats['match_stage'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[2]
 
     player_stats = results.find_all('tr', attrs={'class': ''})
     for i, player in enumerate(player_stats[0:10]):
         
         match_stats[f'player{i}_id'] = player.find('a', attrs = {'class': 'flagAlign no-maps-indicator-offset'}).get('href').split('/')[2]
         match_stats[f'player{i}_rating'] = player.find('td', attrs = {'class': "rating text-center"}).text
+        match_stats[f'player{i}_kast'] = player.find('td', attrs = {'class': "kast text-center"}).text
+        match_stats[f'player{i}_adr'] = player.find('td', attrs = {'class': "adr text-center"}).text
     return match_stats
 
 
