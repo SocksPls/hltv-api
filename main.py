@@ -15,7 +15,7 @@ LOCAL_ZONEINFO = zoneinfo.ZoneInfo(LOCAL_TIMEZONE_NAME)
 TEAM_MAP_FOR_RESULTS = []
 def _get_all_teams():
     if not TEAM_MAP_FOR_RESULTS:
-        teams = get_parsed_page("https://www.hltv.org/stats/teams?minMapCount=0")
+        teams = get_parsed_page("https://www.hltv.org/stats/teams?minMapCount=0", verbose=False)
         for team in teams.find_all("td", {"class": ["teamCol-teams-overview"], }):
             team = {'id': converters.to_int(team.find("a")["href"].split("/")[-2]), 'name': team.find("a").text, 'url': "https://hltv.org" + team.find("a")["href"]}
             TEAM_MAP_FOR_RESULTS.append(team)
@@ -41,7 +41,7 @@ def _monthNameToNumber(monthName: str):
         monthName = "August"
     return datetime.datetime.strptime(monthName, '%B').month
 
-def get_parsed_page(url, delay=0.5, max_trys = 100):
+def get_parsed_page(url, delay=0.5, max_trys = 100, verbose = True):
     # This fixes a blocked by cloudflare error i've encountered
     headers = {
         "referer": "https://www.hltv.org/stats",
@@ -61,12 +61,14 @@ def get_parsed_page(url, delay=0.5, max_trys = 100):
         req = requests.get(url, headers=headers, cookies=cookies)
         try_number += 1
         if try_number == max_trys:
+            if verbose: print(f'Failed to parse after {max_trys} trys')
             break
-        
+    if (req.status_code == 200) and verbose: print(f'Parsed page successfully after {try_number} trys')
+
     results = BeautifulSoup(req.text, "lxml")
     return results
 
-def get_parsed_page_matches(url, delay=0.5, max_trys = 100):
+def get_parsed_page_matches(url, delay=0.5, max_trys = 100, verbose = True):
     # This fixes a blocked error when trying to get game results page
     headers = {
         "referer": "https://www.hltv.org/matches", ## Have changed referer
@@ -86,8 +88,9 @@ def get_parsed_page_matches(url, delay=0.5, max_trys = 100):
         req = requests.get(url, headers=headers, cookies=cookies)
         try_number += 1
         if try_number == max_trys:
+            if verbose: print(f'Failed to parse after {max_trys} trys')
             break
-        
+    if (req.status_code == 200) and verbose: print(f'Parsed page successfully after {try_number} trys')
     results = BeautifulSoup(req.text, "lxml")
     return results
 
@@ -554,7 +557,7 @@ def get_event_team_rankings(event_id):
 
     return team_id_map
 
-def get_match_stats(match_id):
+def get_match_result_stats(match_id):
 
     match_stats = {}
 
@@ -573,8 +576,42 @@ def get_match_stats(match_id):
         match_stats[f'player{i}_rating'] = player.find('td', attrs = {'class': "rating text-center"}).text
         match_stats[f'player{i}_kast'] = player.find('td', attrs = {'class': "kast text-center"}).text
         match_stats[f'player{i}_adr'] = player.find('td', attrs = {'class': "adr text-center"}).text
+
     return match_stats
 
+def get_past_player_stats_for_match(match_id):
+
+    match_stats = {}
+
+    url = 'https://www.hltv.org/matches/' + str(match_id) + '/page'
+
+    results = get_parsed_page_matches(url)
+
+    match_stats['match-id'] = match_id
+
+    ## Want to get previous player stats when the match started, we get the previous 3 months
+    match_date =  eval(results.find('script', attrs={'type': 'application/ld+json'}).text)['startDate'].split('T')[0]
+    y,m,d = match_date.split('-')
+    m = (int(m) - 3) % 12
+    match_date_sub_3_months = '-'.join([y, str(m).zfill(2), d])
+
+    team_ids = [T['url'].split('/')[-2] for T in eval(results.find('script', attrs={'type': 'application/ld+json'}).text)['competitor']]
+
+    for i, team_id in enumerate(team_ids):
+        url = 'https://www.hltv.org/stats/teams/players/'+ team_id +'/page?startDate='+match_date_sub_3_months+'&endDate='+match_date
+        team_page = get_parsed_page_matches(url)
+        player_stats = team_page.find_all('tr')[1:6]
+        for j, player in enumerate(player_stats):
+            if player.find('a'): ## Deals with teams using standin only have 4 roster players
+                match_stats[f'player{5*i+j}_id'] = player.find('a').get('href').split('/')[3]
+                match_stats[f'player{5*i+j}_rating'] = player.find_all('td')[-1].text
+                match_stats[f'player{5*i+j}_kd'] = player.find('td', attrs = {'class': "statsDetail"}).text
+            else:
+                match_stats[f'player{5*i+j}_id'] = None
+                match_stats[f'player{5*i+j}_rating'] = None
+                match_stats[f'player{5*i+j}_kd'] = None
+    
+    return match_stats
 
 
 if __name__ == "__main__":
