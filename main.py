@@ -593,7 +593,9 @@ def get_past_player_stats_for_match(match_id):
     match_date =  eval(results.find('script', attrs={'type': 'application/ld+json'}).text)['startDate'].split('T')[0]
     y,m,d = match_date.split('-')
     m = (int(m) - 3) % 12
-    match_date_sub_3_months = '-'.join([y, str(m).zfill(2), d])
+    if m>9: ## 3 months prior is in previous year
+        y = int(y)-1
+    match_date_sub_3_months = '-'.join([str(y), str(m).zfill(2), d])
 
     team_ids = [T['url'].split('/')[-2] for T in eval(results.find('script', attrs={'type': 'application/ld+json'}).text)['competitor']]
 
