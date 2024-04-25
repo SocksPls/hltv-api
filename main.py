@@ -607,7 +607,7 @@ def get_past_player_stats_for_match(match_id):
             if player.find('a'): ## Deals with teams using standin only have 4 roster players
                 match_stats[f'player{5*i+j}_id'] = player.find('a').get('href').split('/')[3]
                 match_stats[f'player{5*i+j}_rating'] = player.find_all('td')[-1].text
-                match_stats[f'player{5*i+j}_kd'] = player.find('td', attrs = {'class': "statsDetail"}).text
+                match_stats[f'player{5*i+j}_kd'] = player.find_all('td', attrs = {'class': "statsDetail"})[-1].text
             else:
                 match_stats[f'player{5*i+j}_id'] = None
                 match_stats[f'player{5*i+j}_rating'] = None
