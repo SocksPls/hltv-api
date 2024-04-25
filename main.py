@@ -567,16 +567,8 @@ def get_match_result_stats(match_id):
 
     match_stats['match-id'] = match_id
     match_stats['match_type'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[0]
-    match_stats['match_stage'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[2]
-
-    player_stats = results.find_all('tr', attrs={'class': ''})
-    for i, player in enumerate(player_stats[0:10]):
-        
-        match_stats[f'player{i}_id'] = player.find('a', attrs = {'class': 'flagAlign no-maps-indicator-offset'}).get('href').split('/')[2]
-        match_stats[f'player{i}_rating'] = player.find('td', attrs = {'class': "rating text-center"}).text
-        match_stats[f'player{i}_kast'] = player.find('td', attrs = {'class': "kast text-center"}).text
-        match_stats[f'player{i}_adr'] = player.find('td', attrs = {'class': "adr text-center"}).text
-
+    match_stats['match_stage'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[2
+                                                                                                                            ]
     return match_stats
 
 def get_past_player_stats_for_match(match_id):
