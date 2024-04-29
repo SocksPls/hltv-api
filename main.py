@@ -68,7 +68,7 @@ def get_parsed_page(url, delay=0.5, max_trys = 100, verbose = True):
     results = BeautifulSoup(req.text, "lxml")
     return results
 
-def get_parsed_page_matches(url, delay=0.5, max_trys = 100, verbose = True):
+def get_parsed_page_matches(url, delay=1, max_trys = 100, verbose = True):
     # This fixes a blocked error when trying to get game results page
     headers = {
         "referer": "https://www.hltv.org/matches", ## Have changed referer
@@ -567,8 +567,11 @@ def get_match_result_stats(match_id):
 
     match_stats['match-id'] = match_id
     match_stats['match_type'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[0]
-    match_stats['match_stage'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[2
-                                                                                                                            ]
+    match_stats['match_stage'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[2]
+    rank_list = results.find_all('div', attrs={'class': 'teamRanking'})
+    match_stats['team1_Ranking'] = rank_list[0].find('a').contents[1].strip('#')
+    match_stats['team2_Ranking'] = rank_list[1].find('a').contents[1].strip('#')
+
     return match_stats
 
 def get_past_player_stats_for_match(match_id):
