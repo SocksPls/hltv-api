@@ -15,7 +15,7 @@ LOCAL_ZONEINFO = zoneinfo.ZoneInfo(LOCAL_TIMEZONE_NAME)
 TEAM_MAP_FOR_RESULTS = []
 def _get_all_teams():
     if not TEAM_MAP_FOR_RESULTS:
-        teams = get_parsed_page("https://www.hltv.org/stats/teams?minMapCount=0")
+        teams = get_parsed_page("https://www.hltv.org/stats/teams?minMapCount=0", verbose=False)
         for team in teams.find_all("td", {"class": ["teamCol-teams-overview"], }):
             team = {'id': converters.to_int(team.find("a")["href"].split("/")[-2]), 'name': team.find("a").text, 'url': "https://hltv.org" + team.find("a")["href"]}
             TEAM_MAP_FOR_RESULTS.append(team)
@@ -41,7 +41,7 @@ def _monthNameToNumber(monthName: str):
         monthName = "August"
     return datetime.datetime.strptime(monthName, '%B').month
 
-def get_parsed_page(url, delay=0.5):
+def get_parsed_page(url, delay=0.5, max_trys = 100, verbose = True):
     # This fixes a blocked by cloudflare error i've encountered
     headers = {
         "referer": "https://www.hltv.org/stats",
@@ -53,8 +53,46 @@ def get_parsed_page(url, delay=0.5):
     }
 
     time.sleep(delay)
+    req = requests.get(url, headers=headers, cookies=cookies)
 
-    return BeautifulSoup(requests.get(url, headers=headers, cookies=cookies).text, "lxml")
+    try_number = 1
+    while req.status_code == 403: ## 'blocked' error code
+        time.sleep(delay)
+        req = requests.get(url, headers=headers, cookies=cookies)
+        try_number += 1
+        if try_number == max_trys:
+            if verbose: print(f'Failed to parse after {max_trys} trys')
+            break
+    if (req.status_code == 200) and verbose: print(f'Parsed page successfully after {try_number} trys')
+
+    results = BeautifulSoup(req.text, "lxml")
+    return results
+
+def get_parsed_page_matches(url, delay=1, max_trys = 100, verbose = True):
+    # This fixes a blocked error when trying to get game results page
+    headers = {
+        "referer": "https://www.hltv.org/matches", ## Have changed referer
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    }
+
+    cookies = {
+        "hltvTimeZone": HLTV_COOKIE_TIMEZONE
+    }
+
+    time.sleep(delay)
+    req = requests.get(url, headers=headers, cookies=cookies)
+
+    try_number = 1
+    while req.status_code == 403: ##'blocked' error code
+        time.sleep(delay)
+        req = requests.get(url, headers=headers, cookies=cookies)
+        try_number += 1
+        if try_number == max_trys:
+            if verbose: print(f'Failed to parse after {max_trys} trys')
+            break
+    if (req.status_code == 200) and verbose: print(f'Parsed page successfully after {try_number} trys')
+    results = BeautifulSoup(req.text, "lxml")
+    return results
 
 def top5teams():
     home = get_parsed_page("https://hltv.org/")
@@ -441,6 +479,137 @@ def get_match_countdown(match_id):
     date = dateFromHLTV.strftime('%Y-%m-%d')
 
     return _generate_countdown(date, time)
+
+def get_results_by_event(event_id):
+
+    ## event id given as integer
+
+    results = get_parsed_page("https://www.hltv.org/results?event=" + str(event_id))
+
+    results_list = []
+
+    pastresults = results.find_all("div", {"class": "results-holder"})
+
+    for result in pastresults:
+        resultDiv = result.find_all("div", {"class": "result-con"})
+
+        for res in resultDiv:
+            resultObj = {}
+
+            resultObj['url'] = "https://hltv.org" + res.find("a", {"class": "a-reset"}).get("href")
+            
+            resultObj['match-id'] = converters.to_int(res.find("a", {"class": "a-reset"}).get("href").split("/")[-2])
+
+            if (res.parent.find("span", {"class": "standard-headline"})):
+                dateText = res.parent.find("span", {"class": "standard-headline"}).text.replace("Results for ", "").replace("th", "").replace("rd","").replace("st","").replace("nd","")
+
+                dateArr = dateText.split()
+                
+                dateTextFromArrPadded = _padIfNeeded(dateArr[2]) + "-" + _padIfNeeded(_monthNameToNumber(dateArr[0])) + "-" + _padIfNeeded(dateArr[1])
+                dateFromHLTV = datetime.datetime.strptime(dateTextFromArrPadded,'%Y-%m-%d').replace(tzinfo=HLTV_ZONEINFO)
+                dateFromHLTV = dateFromHLTV.astimezone(LOCAL_ZONEINFO)
+
+                resultObj['date'] = dateFromHLTV.strftime('%Y-%m-%d')
+            else:
+                dt = datetime.date.today()
+                resultObj['date'] = str(dt.day) + '/' + str(dt.month) + '/' + str(dt.year)
+
+            if (res.find("td", {"class": "placeholder-text-cell"})):
+                resultObj['event'] = res.find("td", {"class": "placeholder-text-cell"}).text
+            elif (res.find("td", {"class": "event"})):
+                resultObj['event'] = res.find("td", {"class": "event"}).text
+            else:
+                resultObj['event'] = None
+
+            if (res.find_all("td", {"class": "team-cell"})):
+                resultObj['team1'] = res.find_all("td", {"class": "team-cell"})[0].text.lstrip().rstrip()
+                resultObj['team1score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[0].text.lstrip().rstrip())
+                resultObj['team1-id'] = _findTeamId(res.find_all("td", {"class": "team-cell"})[0].text.lstrip().rstrip())
+                resultObj['team2'] = res.find_all("td", {"class": "team-cell"})[1].text.lstrip().rstrip()
+                resultObj['team2-id'] = _findTeamId(res.find_all("td", {"class": "team-cell"})[1].text.lstrip().rstrip())
+                resultObj['team2score'] = converters.to_int(res.find("td", {"class": "result-score"}).find_all("span")[1].text.lstrip().rstrip())
+            else:
+                resultObj['team1'] = None
+                resultObj['team1-id'] = None
+                resultObj['team1score'] = None
+                resultObj['team2'] = None
+                resultObj['team2-id'] = None
+                resultObj['team2score'] = None
+
+            results_list.append(resultObj)
+
+    return results_list
+
+def get_event_team_rankings(event_id):
+
+    url = 'https://www.hltv.org/events/'+ str(event_id) +'/page'
+
+    results = get_parsed_page_matches(url)
+    ranking = [r.text.strip('#') for r in results.find_all('div', attrs={'class': 'event-world-rank'})]
+    teams = [r.text for r in results.find_all('div', attrs={'class': 'text'})]
+
+    team_id_map = {}
+    for i, team in enumerate(teams):
+        if i< len(ranking): ## Sometimes teams do not have ranking (displayed last)
+            team_id_map[team] = ranking[i]
+        else:
+            team_id_map[team] = None
+
+    return team_id_map
+
+def get_match_result_stats(match_id):
+
+    match_stats = {}
+
+    url = 'https://www.hltv.org/matches/' + str(match_id) + '/page'
+
+    results = get_parsed_page_matches(url)
+
+    match_stats['match-id'] = match_id
+    match_stats['match_type'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[0]
+    match_stats['match_stage'] = results.find('div', attrs={'class': 'padding preformatted-text'}).text.strip().split('\n')[2]
+    rank_list = results.find_all('div', attrs={'class': 'teamRanking'})
+    match_stats['team1_Ranking'] = rank_list[0].find('a').contents[1].strip('#')
+    match_stats['team2_Ranking'] = rank_list[1].find('a').contents[1].strip('#')
+
+    return match_stats
+
+def get_past_player_stats_for_match(match_id):
+
+    match_stats = {}
+
+    url = 'https://www.hltv.org/matches/' + str(match_id) + '/page'
+
+    results = get_parsed_page_matches(url)
+
+    match_stats['match-id'] = match_id
+
+    ## Want to get previous player stats when the match started, we get the previous 3 months
+    match_date =  eval(results.find('script', attrs={'type': 'application/ld+json'}).text)['startDate'].split('T')[0]
+    y,m,d = match_date.split('-')
+    m = (int(m) - 3) % 12
+    if m>9: ## 3 months prior is in previous year
+        y = int(y)-1
+    match_date_sub_3_months = '-'.join([str(y), str(m).zfill(2), d])
+
+    team_ids = [T['url'].split('/')[-2] for T in eval(results.find('script', attrs={'type': 'application/ld+json'}).text)['competitor']]
+
+    for i, team_id in enumerate(team_ids):
+        url = 'https://www.hltv.org/stats/teams/players/'+ team_id +'/page?startDate='+match_date_sub_3_months+'&endDate='+match_date
+        team_page = get_parsed_page_matches(url)
+        player_stats = team_page.find_all('tr')[1:6]
+        for j, player in enumerate(player_stats):
+            if player.find('a'): ## Deals with teams using standin only have 4 roster players
+                match_stats[f'player{5*i+j}_id'] = player.find('a').get('href').split('/')[3]
+                match_stats[f'player{5*i+j}_rating'] = player.find_all('td')[-1].text
+                match_stats[f'player{5*i+j}_kd'] = player.find_all('td', attrs = {'class': "statsDetail"})[-1].text
+            else:
+                match_stats[f'player{5*i+j}_id'] = None
+                match_stats[f'player{5*i+j}_rating'] = None
+                match_stats[f'player{5*i+j}_kd'] = None
+    
+    return match_stats
+
 
 if __name__ == "__main__":
     import pprint
